@@ -77,12 +77,12 @@ public class GoogleAIImplTest
             }
 
             private void printChat(String model, String userInput, GoogleAIImpl googleAI) {
+                System.out.println("test fetchChatResponse on model [" + model + "]");
+                System.out.println("userInput = " + userInput);
                 AIModel.PromptStruct promptStruct = new AIModel.PromptStruct();
                 promptStruct.setUserInput(userInput);
                 AIModel.ChatResponse chatResponse = googleAI.fetchChatResponse(model, promptStruct);
-
-                System.out.println("userInput = " + userInput);
-                System.out.println("response from " + model + ": " + chatResponse.getMessage());
+                System.out.println("response = " + chatResponse.getMessage());
             }
         });
     }
@@ -99,8 +99,14 @@ public class GoogleAIImplTest
             public Object query(DBConnectionIFC dbConnection) {
                 GoogleAIImpl googleAI = GoogleAIImpl.getInstance(dbConnection);
                 String[] models = googleAI.getEmbeddingModels();
-                AIModel.Embedding embedding = googleAI.getEmbedding(models[0], userInput);
-                return embedding; 
+                for(String model: models) {
+                    System.out.println("test getEmbedding on model [" + model + "]");
+                    System.out.println("userInput = " + userInput);
+                    AIModel.Embedding embedding = googleAI.getEmbedding(model, userInput);
+                    System.out.println("embedding.size = " + embedding.size());
+                    System.out.println("embedding = " + embedding.toString());
+                }
+                return null; 
             }
         });
     }
@@ -112,10 +118,17 @@ public class GoogleAIImplTest
             public Object query(DBConnectionIFC dbConnection) {
                 GoogleAIImpl googleAI = GoogleAIImpl.getInstance(dbConnection);
                 String[] models = googleAI.getImageModels();
-                AIModel.ImagePrompt imagePrompt = new AIModel.ImagePrompt();
-                imagePrompt.setUserInput(userInput);
-                String[] urls = googleAI.generateImages(models[0], imagePrompt);
-                return urls; 
+                for(String model: models) {
+                    System.out.println("test generateImages on model [" + model + "]");
+                    System.out.println("userInput = " + userInput);
+                    AIModel.ImagePrompt imagePrompt = new AIModel.ImagePrompt();
+                    imagePrompt.setUserInput(userInput);
+                    String[] urls = googleAI.generateImages(models[0], imagePrompt);
+                    for(String url: urls) {
+                        System.out.println("url = " + url);
+                    }
+                }
+                return null; 
             }
         });
     }
@@ -142,9 +155,7 @@ public class GoogleAIImplTest
     public void testVisionImage() throws Exception {
         try {
             String userInput = "Hello, please give me an description of the images";
-            String response = visionImage(userInput);
-            System.out.println("userInput = " + userInput);
-            System.out.println("response = " + response);
+            visionImage(userInput);
         }
         catch(Exception ex) {
             System.out.println("ex.message = " + ex.getMessage());
@@ -155,10 +166,7 @@ public class GoogleAIImplTest
     public void testGetEmbedding() throws Exception {
         try {
             String userInput = "Hello, how are you! I'm Neo, nice to meet you!";
-            AIModel.Embedding embedding = getEmbedding(userInput);
-            System.out.println("userInput = " + userInput);
-            System.out.println("embedding.size = " + embedding.size());
-            System.out.println("embedding = " + embedding.toString());
+            getEmbedding(userInput);
         }
         catch(Exception ex) {
             System.out.println("ex.message = " + ex.getMessage());
@@ -169,10 +177,7 @@ public class GoogleAIImplTest
     public void _testGenerateImage() throws Exception {
         try {
             String userInput = "Blue sky outside the window, with white clouds and blue sea";
-            String[] urls = generateImages(userInput);
-            for(String url: urls) {
-                System.out.println("image url = " + url);
-            }
+            generateImages(userInput);
         }
         catch(Exception ex) {
             System.out.println("ex.message = " + ex.getMessage());
@@ -201,37 +206,42 @@ class GoogleVisionImageTask implements DBQueryTaskIFC {
     private Object innerQuery(DBConnectionIFC dbConnection) throws Exception {
         GoogleAIImpl googleAI = GoogleAIImpl.getInstance(dbConnection);
         String[] models = googleAI.getVisionModels();
-        AIModel.PromptStruct promptStruct = new AIModel.PromptStruct();
-        promptStruct.setUserInput(userInput);
+        for(String model: models) {
+            System.out.println("test vision on model [" + model + "]");
+            System.out.println("userInput = " + userInput);
+            AIModel.PromptStruct promptStruct = new AIModel.PromptStruct();
+            promptStruct.setUserInput(userInput);
 
-        AIModel.Attachment attachment1 = new AIModel.Attachment();
-        InputStream in1 = new FileInputStream("/tmp/dogandcat.png");
-        String rawBase64OfAttach1 = IOUtil.inputStreamToRawBase64(in1);
-        String base64 = "data:image/png;base64," + rawBase64OfAttach1;
-        attachment1.setContent(base64);
+            AIModel.Attachment attachment1 = new AIModel.Attachment();
+            InputStream in1 = new FileInputStream("/tmp/dogandcat.png");
+            String rawBase64OfAttach1 = IOUtil.inputStreamToRawBase64(in1);
+            String base64 = "data:image/png;base64," + rawBase64OfAttach1;
+            attachment1.setContent(base64);
 
-        AIModel.Attachment attachment2 = new AIModel.Attachment();
-        InputStream in2 = new FileInputStream("/tmp/image.jpg");
-        String rawBase64OfAttach2 = IOUtil.inputStreamToRawBase64(in2);
-        base64 = "data:image/jpeg;base64," + rawBase64OfAttach2;
-        attachment2.setContent(base64);
+            AIModel.Attachment attachment2 = new AIModel.Attachment();
+            InputStream in2 = new FileInputStream("/tmp/image.jpg");
+            String rawBase64OfAttach2 = IOUtil.inputStreamToRawBase64(in2);
+            base64 = "data:image/jpeg;base64," + rawBase64OfAttach2;
+            attachment2.setContent(base64);
 
-        AIModel.Attachment attachment3 = new AIModel.Attachment();
-        String imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg";
-        attachment3.setContent(imageUrl);
+            AIModel.Attachment attachment3 = new AIModel.Attachment();
+            String imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg";
+            attachment3.setContent(imageUrl);
 
-        List<AIModel.Attachment> attachments = new ArrayList<AIModel.Attachment>();
-        attachments.add(attachment1);
-        attachments.add(attachment2);
-        // attachments.add(attachment3);
+            List<AIModel.Attachment> attachments = new ArrayList<AIModel.Attachment>();
+            attachments.add(attachment1);
+            attachments.add(attachment2);
+            // attachments.add(attachment3);
 
-        AIModel.AttachmentGroup attachmentGroup = new AIModel.AttachmentGroup();
-        attachmentGroup.setAttachments(attachments);
+            AIModel.AttachmentGroup attachmentGroup = new AIModel.AttachmentGroup();
+            attachmentGroup.setAttachments(attachments);
 
-        promptStruct.setAttachmentGroup(attachmentGroup);
+            promptStruct.setAttachmentGroup(attachmentGroup);
 
-        AIModel.ChatResponse chatResponse = googleAI.fetchChatResponse(models[0], promptStruct);
-        return chatResponse.getMessage(); 
+            AIModel.ChatResponse chatResponse = googleAI.fetchChatResponse(model, promptStruct);
+            System.out.println("response = " + chatResponse.getMessage());
+        }
+        return null; 
     }
 }
 
