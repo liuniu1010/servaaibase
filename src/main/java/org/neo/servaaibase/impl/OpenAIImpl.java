@@ -29,11 +29,14 @@ public class OpenAIImpl extends AbsOpenAIImpl {
     private static String dall_e_3 = "dall-e-3";
     private static String dall_e_2 = "dall-e-2";
     private static String gpt_4_vision_preview = "gpt-4-vision-preview";
+    private static String tts_1 = "tts-1";
+    private static String tts_1_hd = "tts-1-hd";
 
     private String[] chatModels;
     private String[] embeddingModels;
     private String[] imageModels;
     private String[] visionModels;
+    private String[] textToSpeechModels;
 
     private Map<String, String> urlMapping;
     private Map<String, Integer> contextWindowMapping;
@@ -44,6 +47,7 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         embeddingModels = new String[]{text_embedding_3_large, text_embedding_3_small};
         imageModels = new String[]{dall_e_3, dall_e_2};
         visionModels = new String[]{gpt_4_vision_preview};
+        textToSpeechModels = new String[]{tts_1, tts_1_hd}; 
 
         urlMapping = new HashMap<String, String>();
         urlMapping.put(gpt_4_turbo_preview, "https://api.openai.com/v1/chat/completions");
@@ -96,6 +100,11 @@ public class OpenAIImpl extends AbsOpenAIImpl {
     @Override
     public String[] getVisionModels() {
         return visionModels;
+    }
+
+    @Override
+    public String[] getTextToSpeechModels() {
+        return textToSpeechModels;
     }
 
     @Override

@@ -111,6 +111,12 @@ abstract public class AbsGoogleAIImpl implements SuperAIIFC {
         }
     }
 
+    @Override
+    public String generateSpeech(String model, String input) {
+        // to be implemented
+        return null;
+    }
+
     private String[] innerGenerateImage(String model, AIModel.ImagePrompt imagePrompt) throws Exception {
         String jsonInput = generateJsonBodyToGenerateImage(model, imagePrompt);
         String url = getUrl(model, "generateImage");   // adjust later

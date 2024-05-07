@@ -31,6 +31,7 @@ public class GoogleAIImpl extends AbsGoogleAIImpl {
     private String[] embeddingModels;
     private String[] imageModels;
     private String[] visionModels;
+    private String[] textToSpeechModels;
 
     private Map<String, Integer> maxOutputMapping;
     private Map<String, Integer> maxInputMapping;
@@ -40,6 +41,7 @@ public class GoogleAIImpl extends AbsGoogleAIImpl {
         embeddingModels = new String[]{embedding_001};
         imageModels = new String[]{};
         visionModels = new String[]{gemini_pro_vision};
+        textToSpeechModels = new String[] {};
 
         maxOutputMapping = new HashMap<String, Integer>();
         maxOutputMapping.put(gemini_1_5_pro_latest, 8192);
@@ -84,6 +86,10 @@ public class GoogleAIImpl extends AbsGoogleAIImpl {
     @Override
     public String[] getVisionModels() {
         return visionModels;
+    }
+
+    public String[] getTextToSpeechModels() {
+        return textToSpeechModels;
     }
 
     @Override

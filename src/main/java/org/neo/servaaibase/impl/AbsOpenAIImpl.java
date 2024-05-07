@@ -108,6 +108,12 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         }
     }
 
+    @Override
+    public String generateSpeech(String model, String input) {
+        // to be implemented
+        return null;
+    }
+
     private AIModel.ChatResponse innerFetchChatResponse(String model, AIModel.PromptStruct promptStruct, FunctionCallIFC functionCallIFC) throws Exception {
         int maxTokens = determineMaxTokens(model, promptStruct, functionCallIFC);
         AIModel.ChatResponse chatResponse = innerFetchChatResponse(model, promptStruct, maxTokens, functionCallIFC);
