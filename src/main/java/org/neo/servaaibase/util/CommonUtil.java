@@ -2,10 +2,11 @@ package org.neo.servaaibase.util;
 
 import java.util.List;
 import java.util.Date;
-import java.text.SimpleDateFormat;
+import java.util.Random;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.text.SimpleDateFormat;
 import java.io.File;
 
 import org.neo.servaframe.interfaces.DBConnectionIFC;
@@ -246,4 +247,25 @@ public class CommonUtil {
         }
         return base64; // If no prefix is present, return the original string
     }
+
+    public static String getRandomString(int length) {
+        String charSet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder(length);
+
+        for (int i = 0; i < length; i++) {
+            int index = random.nextInt(charSet.length());
+            sb.append(charSet.charAt(index));
+        }
+
+        return sb.toString();
+    }
+
+    public static String normalizeFolderPath(String folderPath) {
+        if (folderPath.endsWith("/") && !folderPath.equals("/")) {
+            return folderPath.substring(0, folderPath.length() - 1);
+        }
+        return folderPath;
+    }
 }
+

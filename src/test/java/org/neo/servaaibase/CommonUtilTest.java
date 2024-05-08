@@ -94,5 +94,37 @@ public class CommonUtilTest
         assertEquals(extractMimeType, null);
         assertEquals(extractRawBase64, rawBase64);
     }
+
+    public void testGetRandomString() {
+        int length = 25;
+        String randomString = CommonUtil.getRandomString(length);
+        System.out.println("randomString = " + randomString);
+        System.out.println("randomString size = " + randomString.length());
+
+        assertEquals(randomString.length(), length);
+    }
+
+    public void testNormalizeFolderPath() {
+        String folderPath1 = "/home/neo/";
+        String expectedPath1 = "/home/neo";
+
+        String folderPath2 = "/tmp";
+        String expectedPath2 = "/tmp";
+
+        String folderPath3 = "/";
+        String expectedPath3 = "/";
+
+        String normalizedPath1 = CommonUtil.normalizeFolderPath(folderPath1);
+        String normalizedPath2 = CommonUtil.normalizeFolderPath(folderPath2);
+        String normalizedPath3 = CommonUtil.normalizeFolderPath(folderPath3);
+
+        System.out.println("Normalized Path 1: " + normalizedPath1);
+        System.out.println("Normalized Path 2: " + normalizedPath2);
+        System.out.println("Normalized Path 3: " + normalizedPath3);
+
+        assertEquals(normalizedPath1, expectedPath1);
+        assertEquals(normalizedPath2, expectedPath2);
+        assertEquals(normalizedPath3, expectedPath3);
+    }
 }
 

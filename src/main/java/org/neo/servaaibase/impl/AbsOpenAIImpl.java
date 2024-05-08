@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.File;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -23,6 +24,7 @@ import org.neo.servaframe.util.IOUtil;
 import org.neo.servaaibase.ifc.SuperAIIFC;
 import org.neo.servaaibase.ifc.FunctionCallIFC;
 import org.neo.servaaibase.model.AIModel;
+import org.neo.servaaibase.util.CommonUtil;
 
 abstract public class AbsOpenAIImpl implements SuperAIIFC {
     final static Logger logger = Logger.getLogger(AbsOpenAIImpl.class);
@@ -109,9 +111,18 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
     }
 
     @Override
-    public String generateSpeech(String model, String input) {
-        // to be implemented
-        return null;
+    public String generateSpeech(String model, AIModel.TextToSpeechPrompt textToSpeechPrompt, String onlineFileMountPoint) {
+        try {
+            return innerGenerateSpeech(model, textToSpeechPrompt, onlineFileMountPoint);
+        }
+        catch(RuntimeException rex) {
+            logger.error(rex.getMessage(), rex);
+            throw rex;
+        }
+        catch(Exception ex) {
+            logger.error(ex.getMessage(), ex);
+            throw new RuntimeException(ex);
+        }
     }
 
     private AIModel.ChatResponse innerFetchChatResponse(String model, AIModel.PromptStruct promptStruct, FunctionCallIFC functionCallIFC) throws Exception {
@@ -125,6 +136,14 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         String jsonResponse = send(model, jsonInput);
         String[] urls = extractImageUrlsFromJson(jsonResponse);
         return urls;
+    }
+
+    private String innerGenerateSpeech(String model, AIModel.TextToSpeechPrompt textToSpeechPrompt, String onlineFileMountPoint) throws Exception {
+        String jsonInput = generateJsonBodyToGenerateSpeech(model, textToSpeechPrompt);
+        String fileName = CommonUtil.getRandomString(10) + "." + textToSpeechPrompt.getOutputFormat();
+        String filePath = CommonUtil.normalizeFolderPath(onlineFileMountPoint) + File.separator + fileName;
+        sendAndGenerateFile(model, jsonInput, filePath);
+        return filePath;
     }
 
     private AIModel.Embedding innerGetEmbedding(String model, String input, int dimensions) throws Exception {
@@ -435,6 +454,51 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         jsonBody.addProperty("n", imagePrompt.getNumber());
 
         return gson.toJson(jsonBody);
+    }
+
+    private String generateJsonBodyToGenerateSpeech(String model, AIModel.TextToSpeechPrompt textToSpeechPrompt) {
+        Gson gson = new Gson();
+        JsonObject jsonBody = new JsonObject();
+
+        jsonBody.addProperty("model", model);
+        jsonBody.addProperty("input", textToSpeechPrompt.getUserInput());
+        jsonBody.addProperty("voice", textToSpeechPrompt.getVoice());
+        jsonBody.addProperty("output_format", textToSpeechPrompt.getOutputFormat());
+
+        return gson.toJson(jsonBody);
+    }
+
+    private void sendAndGenerateFile(String model, String jsonInput, String filePath) throws Exception {
+        logger.debug("call openai api, model = " + model + ", jsonInput = " + jsonInput);
+        URL url = new URL(getUrl(model));
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        try {
+            connection.setRequestMethod("POST");
+
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("Authorization", "Bearer " + getApiKey());
+
+            connection.setDoOutput(true);
+
+            try (OutputStream os = connection.getOutputStream()){
+                IOUtil.stringToOutputStream(jsonInput, os);
+            }
+
+            try (InputStream in = connection.getInputStream()){
+                IOUtil.inputStreamToFile(in, filePath);
+                logger.debug("return from openai api, file [" + filePath +"] generated."); 
+            }
+        }
+        catch(Exception ex) {
+            try (InputStream errIn = connection.getErrorStream()) {
+                String errorResponse = IOUtil.inputStreamToString(errIn);
+                logger.error("get exception from openai api, response = " + errorResponse);
+            }
+            throw ex;
+        }
+        finally {
+            connection.disconnect();
+        }
     }
 
     private String send(String model, String jsonInput) throws Exception {

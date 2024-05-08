@@ -137,6 +137,36 @@ public class AIModel {
         }
     }
 
+    public static class TextToSpeechPrompt {
+        private String userInput;
+        private String voice;
+        private String outputFormat = "mp3";  // default as mp3
+
+        public String getUserInput() {
+            return userInput;
+        }
+
+        public void setUserInput(String inputUserInput) {
+            userInput = inputUserInput;
+        }
+
+        public String getVoice() {
+            return voice;
+        }
+
+        public void setVoice(String inputVoice) {
+            voice = inputVoice;
+        }
+
+        public String getOutputFormat() {
+            return outputFormat;
+        }
+
+        public void setOutputFormat(String inputOutputFormat) {
+            outputFormat = inputOutputFormat;
+        }
+    }
+
     public static class ChatResponse {
         private boolean isSuccess;
         private String message;   // in case isSuccess is false, message is exception info

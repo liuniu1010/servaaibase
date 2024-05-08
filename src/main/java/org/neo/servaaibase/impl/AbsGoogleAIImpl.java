@@ -112,7 +112,7 @@ abstract public class AbsGoogleAIImpl implements SuperAIIFC {
     }
 
     @Override
-    public String generateSpeech(String model, String input) {
+    public String generateSpeech(String model, AIModel.TextToSpeechPrompt textToSpeechPrompt, String onlineFileMountPoint) {
         // to be implemented
         return null;
     }
