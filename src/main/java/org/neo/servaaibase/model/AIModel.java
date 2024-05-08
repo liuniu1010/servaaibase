@@ -139,7 +139,7 @@ public class AIModel {
 
     public static class TextToSpeechPrompt {
         private String userInput;
-        private String voice;
+        private String voice = "alloy";   // default as alloy
         private String outputFormat = "mp3";  // default as mp3
 
         public String getUserInput() {

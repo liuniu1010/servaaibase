@@ -75,6 +75,11 @@ public class OpenAIImplTest
         return (String[])dbService.executeQueryTask(new GenerateImageTask(userInput));
     }
 
+    private String generateSpeech(String userInput) {
+        DBServiceIFC dbService = ServiceFactory.getDBService();
+        return (String)dbService.executeQueryTask(new GenerateSpeechTask(userInput));
+    }
+
     public void testGetChatModels() {
         String[] models = getChatModels();
         System.out.println("models.size = " + models.length);
@@ -120,6 +125,17 @@ public class OpenAIImplTest
         try {
             String userInput = "Blue sky outside the window, with white clouds and blue sea";
             generateImages(userInput);
+        }
+        catch(Exception ex) {
+            System.out.println("ex.message = " + ex.getMessage());
+            throw ex;
+        }
+    }
+
+    public void testGenerateSpeech() throws Exception {
+        try {
+            String userInput = "Today is a new nice day!";
+            generateSpeech(userInput);
         }
         catch(Exception ex) {
             System.out.println("ex.message = " + ex.getMessage());
@@ -253,6 +269,30 @@ class GenerateImageTask implements DBQueryTaskIFC {
             for(String url: urls) {
                 System.out.println("image url = " + url);
             }
+        }
+        return null; 
+    }
+}
+
+class GenerateSpeechTask implements DBQueryTaskIFC {
+    private String userInput;
+
+    public GenerateSpeechTask(String inputUserInput) {
+        userInput = inputUserInput;
+    }
+
+    @Override
+    public Object query(DBConnectionIFC dbConnection) {
+        OpenAIImpl openAI = OpenAIImpl.getInstance(dbConnection);
+        String[] models = openAI.getTextToSpeechModels();
+        for(String model: models) {
+            System.out.println("test generateTextToSpeech with model [" + model + "]");
+            System.out.println("userInput = " + userInput);
+            AIModel.TextToSpeechPrompt textToSpeechPrompt = new AIModel.TextToSpeechPrompt();
+            textToSpeechPrompt.setUserInput(userInput);
+            String mountPoint = "/tmp/";
+            String filePath = openAI.generateSpeech(model, textToSpeechPrompt, mountPoint);
+            System.out.println("generated file = " + filePath);
         }
         return null; 
     }

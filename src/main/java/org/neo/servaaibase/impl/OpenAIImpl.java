@@ -57,6 +57,8 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         urlMapping.put(dall_e_3, "https://api.openai.com/v1/images/generations");
         urlMapping.put(dall_e_2, "https://api.openai.com/v1/images/generations");
         urlMapping.put(gpt_4_vision_preview, "https://api.openai.com/v1/chat/completions");
+        urlMapping.put(tts_1, "https://api.openai.com/v1/audio/speech");
+        urlMapping.put(tts_1_hd, "https://api.openai.com/v1/audio/speech");
 
         contextWindowMapping = new HashMap<String, Integer>();
         contextWindowMapping.put(gpt_4_turbo_preview, 128000);
