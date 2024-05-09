@@ -140,10 +140,10 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
 
     private String innerGenerateSpeech(String model, AIModel.TextToSpeechPrompt textToSpeechPrompt, String onlineFileMountPoint) throws Exception {
         String jsonInput = generateJsonBodyToGenerateSpeech(model, textToSpeechPrompt);
-        String fileName = CommonUtil.getRandomString(10) + "." + textToSpeechPrompt.getOutputFormat();
+        String fileName = "audio_" + CommonUtil.getRandomString(10) + "." + textToSpeechPrompt.getOutputFormat();
         String filePath = CommonUtil.normalizeFolderPath(onlineFileMountPoint) + File.separator + fileName;
         sendAndGenerateFile(model, jsonInput, filePath);
-        return filePath;
+        return fileName;
     }
 
     private AIModel.Embedding innerGetEmbedding(String model, String input, int dimensions) throws Exception {
