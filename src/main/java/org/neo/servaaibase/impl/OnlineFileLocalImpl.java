@@ -1,8 +1,8 @@
 package org.neo.servaaibase.impl;
 
-import org.neo.servaaibase.ifc.OnlineFileSystem;
+import org.neo.servaaibase.ifc.OnlineFileSystemIFC;
 
-public class OnlineFileLocalImpl implements OnlineFileSystem {
+public class OnlineFileLocalImpl implements OnlineFileSystemIFC {
     private String mountPoint;
     private OnlineFileLocalImpl() {
     }
@@ -11,7 +11,7 @@ public class OnlineFileLocalImpl implements OnlineFileSystem {
         mountPoint = inputMountPoint;
     }
 
-    public static OnlineFileSystem getInstance(String inputMountPoint) {
+    public static OnlineFileSystemIFC getInstance(String inputMountPoint) {
         return new OnlineFileLocalImpl(inputMountPoint);
     }
 

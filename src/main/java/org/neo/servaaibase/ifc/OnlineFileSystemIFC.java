@@ -1,5 +1,5 @@
 package org.neo.servaaibase.ifc;
 
-public interface OnlineFileSystem {
+public interface OnlineFileSystemIFC {
     public String getMountPoint();
 }
