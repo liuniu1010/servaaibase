@@ -490,9 +490,12 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
             }
         }
         catch(Exception ex) {
+            logger.error("get exeception in sending, " + ex.getMessage(), ex);
             try (InputStream errIn = connection.getErrorStream()) {
-                String errorResponse = IOUtil.inputStreamToString(errIn);
-                logger.error("get exception from openai api, response = " + errorResponse);
+                if(errIn != null) {
+                    String errorResponse = IOUtil.inputStreamToString(errIn);
+                    logger.error("get exception from openai api, response = " + errorResponse);
+                }
             }
             throw ex;
         }
