@@ -290,8 +290,8 @@ class GenerateSpeechTask implements DBQueryTaskIFC {
             System.out.println("userInput = " + userInput);
             AIModel.TextToSpeechPrompt textToSpeechPrompt = new AIModel.TextToSpeechPrompt();
             textToSpeechPrompt.setUserInput(userInput);
-            String mountPoint = "/tmp/";
-            String filePath = openAI.generateSpeech(model, textToSpeechPrompt, mountPoint);
+            String absolutePath = "/tmp/";
+            String filePath = openAI.generateSpeech(model, textToSpeechPrompt, absolutePath);
             System.out.println("generated file = " + filePath);
         }
         return null; 

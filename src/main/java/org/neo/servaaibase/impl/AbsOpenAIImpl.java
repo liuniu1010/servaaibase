@@ -111,9 +111,9 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
     }
 
     @Override
-    public String generateSpeech(String model, AIModel.TextToSpeechPrompt textToSpeechPrompt, String onlineFileMountPoint) {
+    public String generateSpeech(String model, AIModel.TextToSpeechPrompt textToSpeechPrompt, String onlineFileAbsolutePath) {
         try {
-            return innerGenerateSpeech(model, textToSpeechPrompt, onlineFileMountPoint);
+            return innerGenerateSpeech(model, textToSpeechPrompt, onlineFileAbsolutePath);
         }
         catch(RuntimeException rex) {
             logger.error(rex.getMessage(), rex);
@@ -138,10 +138,10 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         return urls;
     }
 
-    private String innerGenerateSpeech(String model, AIModel.TextToSpeechPrompt textToSpeechPrompt, String onlineFileMountPoint) throws Exception {
+    private String innerGenerateSpeech(String model, AIModel.TextToSpeechPrompt textToSpeechPrompt, String onlineFileAbsolutePath) throws Exception {
         String jsonInput = generateJsonBodyToGenerateSpeech(model, textToSpeechPrompt);
         String fileName = "audio_" + CommonUtil.getRandomString(10) + "." + textToSpeechPrompt.getOutputFormat();
-        String filePath = CommonUtil.normalizeFolderPath(onlineFileMountPoint) + File.separator + fileName;
+        String filePath = CommonUtil.normalizeFolderPath(onlineFileAbsolutePath) + File.separator + fileName;
         sendAndGenerateFile(model, jsonInput, filePath);
         return fileName;
     }
