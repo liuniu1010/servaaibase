@@ -267,5 +267,10 @@ public class CommonUtil {
         }
         return folderPath;
     }
+
+    public static String getFileName(String filePath) {
+        File file = new File(filePath);
+        return file.getName();
+    }
 }
 

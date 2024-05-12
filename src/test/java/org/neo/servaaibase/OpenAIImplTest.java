@@ -65,6 +65,11 @@ public class OpenAIImplTest
         return (String)dbService.executeQueryTask(new VisionImageTask(userInput));
     }
 
+    private String speechToText(String filePath) {
+        DBServiceIFC dbService = ServiceFactory.getDBService();
+        return (String)dbService.executeQueryTask(new SpeechToTextTask(filePath));
+    }
+
     private AIModel.Embedding getEmbedding(String userInput) {
         DBServiceIFC dbService = ServiceFactory.getDBService();
         return (AIModel.Embedding)dbService.executeQueryTask(new GetEmbeddingTask(userInput));
@@ -136,6 +141,17 @@ public class OpenAIImplTest
         try {
             String userInput = "Today is a new nice day!";
             generateSpeech(userInput);
+        }
+        catch(Exception ex) {
+            System.out.println("ex.message = " + ex.getMessage());
+            throw ex;
+        }
+    }
+
+    public void testSpeechToText() throws Exception {
+        try {
+            String filePath = "/tmp/Zf7oNt4Vdz.mp3";
+            speechToText(filePath);
         }
         catch(Exception ex) {
             System.out.println("ex.message = " + ex.getMessage());
@@ -221,6 +237,40 @@ class VisionImageTask implements DBQueryTaskIFC {
             promptStruct.setAttachmentGroup(attachmentGroup);
 
             AIModel.ChatResponse chatResponse = openAI.fetchChatResponse(model, promptStruct);
+            System.out.println("response = " + chatResponse.getMessage());
+        }
+        return null; 
+    }
+}
+
+class SpeechToTextTask implements DBQueryTaskIFC {
+    private String filePath;
+
+    public SpeechToTextTask(String inputFilePath) {
+        filePath = inputFilePath;
+    }
+
+    @Override
+    public Object query(DBConnectionIFC dbConnection) {
+        try {
+            return innerQuery(dbConnection);
+        }
+        catch(Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    private Object innerQuery(DBConnectionIFC dbConnection) throws Exception {
+        OpenAIImpl openAI = OpenAIImpl.getInstance(dbConnection);
+        String[] models = openAI.getSpeechToTextModels();
+        for(String model: models) {
+            System.out.println("test audio to text with model [" + model + "]");
+            System.out.println("filePath = " + filePath);
+
+            AIModel.Attachment attachment = new AIModel.Attachment();
+            attachment.setContent(filePath);
+
+            AIModel.ChatResponse chatResponse = openAI.audioToText(model, attachment);
             System.out.println("response = " + chatResponse.getMessage());
         }
         return null; 

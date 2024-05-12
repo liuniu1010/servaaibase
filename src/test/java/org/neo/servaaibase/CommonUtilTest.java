@@ -126,5 +126,11 @@ public class CommonUtilTest
         assertEquals(normalizedPath2, expectedPath2);
         assertEquals(normalizedPath3, expectedPath3);
     }
+
+    public void testGetFileName() {
+        String filePath = "/tmp/audio.mp3";
+        String fileName = CommonUtil.getFileName(filePath);
+        assertEquals(fileName, "audio.mp3");
+    }
 }
 

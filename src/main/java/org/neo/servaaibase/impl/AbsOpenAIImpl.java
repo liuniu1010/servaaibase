@@ -14,6 +14,13 @@ import java.nio.charset.StandardCharsets;
 
 import org.apache.log4j.Logger;
 
+import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -162,8 +169,8 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
     }
 
     private AIModel.ChatResponse innerAudioToText(String model, AIModel.Attachment attachment) throws Exception {
-        String jsonInput = generateJsonBodyForAudioToText(model, attachment);
-        String jsonResponse = send(model, jsonInput);
+        String filePath = attachment.getContent();
+        String jsonResponse = sendWithFormData(model, filePath);
         AIModel.ChatResponse chatResponse = extractTextFromAudioJson(jsonResponse);
         return chatResponse;
     }
@@ -293,8 +300,10 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
     }
 
     private AIModel.ChatResponse extractTextFromAudioJson(String jsonResponse) throws Exception {
-        // to be implemented
-        return null;
+        JsonElement element = JsonParser.parseString(jsonResponse);
+        JsonObject jsonObject = element.getAsJsonObject();
+        String text = jsonObject.get("text").getAsString();
+        return new AIModel.ChatResponse(true, text);
     }
 
     private AIModel.ChatResponse extractChatResponseFromJson(String jsonResponse) throws Exception {
@@ -495,11 +504,6 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         return gson.toJson(jsonBody);
     }
 
-    private String generateJsonBodyForAudioToText(String model, AIModel.Attachment attachment) {
-        // to be implement
-        return null;
-    }
-
     private void sendAndGenerateFile(String model, String jsonInput, String filePath) throws Exception {
         logger.debug("call openai api, model = " + model + ", jsonInput = " + jsonInput);
         URL url = new URL(getUrl(model));
@@ -533,6 +537,32 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         }
         finally {
             connection.disconnect();
+        }
+    }
+
+    private String sendWithFormData(String model, String filePath) throws Exception {
+        OkHttpClient client = new OkHttpClient();
+        
+        String fileName = CommonUtil.getFileName(filePath);
+        RequestBody requestBody = new MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("file", fileName, RequestBody.create(new File(filePath), MediaType.parse("audio/mpeg")))
+            .addFormDataPart("model", model)
+            .build();
+
+        Request request = new Request.Builder()
+                .url(getUrl(model))
+                .post(requestBody)
+                .addHeader("Authorization", "Bearer " + getApiKey())
+                .addHeader("Content-Type", "multipart/form-data")
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new RuntimeException("Unexpected code " + response);
+            }
+
+            return response.body().string();
         }
     }
 
