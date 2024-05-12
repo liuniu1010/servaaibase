@@ -31,12 +31,14 @@ public class OpenAIImpl extends AbsOpenAIImpl {
     private static String gpt_4_vision_preview = "gpt-4-vision-preview";
     private static String tts_1 = "tts-1";
     private static String tts_1_hd = "tts-1-hd";
+    private static String whisper_1 = "whisper-1";
 
     private String[] chatModels;
     private String[] embeddingModels;
     private String[] imageModels;
     private String[] visionModels;
     private String[] textToSpeechModels;
+    private String[] speechToTextModels;
 
     private Map<String, String> urlMapping;
     private Map<String, Integer> contextWindowMapping;
@@ -47,7 +49,8 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         embeddingModels = new String[]{text_embedding_3_large, text_embedding_3_small};
         imageModels = new String[]{dall_e_3, dall_e_2};
         visionModels = new String[]{gpt_4_vision_preview};
-        textToSpeechModels = new String[]{tts_1, tts_1_hd}; 
+        textToSpeechModels = new String[]{tts_1, tts_1_hd};
+        speechToTextModels = new String[]{whisper_1};
 
         urlMapping = new HashMap<String, String>();
         urlMapping.put(gpt_4_turbo_preview, "https://api.openai.com/v1/chat/completions");
@@ -59,6 +62,7 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         urlMapping.put(gpt_4_vision_preview, "https://api.openai.com/v1/chat/completions");
         urlMapping.put(tts_1, "https://api.openai.com/v1/audio/speech");
         urlMapping.put(tts_1_hd, "https://api.openai.com/v1/audio/speech");
+        urlMapping.put(whisper_1, "https://api.openai.com/v1/audio/transcriptions");
 
         contextWindowMapping = new HashMap<String, Integer>();
         contextWindowMapping.put(gpt_4_turbo_preview, 128000);
@@ -107,6 +111,11 @@ public class OpenAIImpl extends AbsOpenAIImpl {
     @Override
     public String[] getTextToSpeechModels() {
         return textToSpeechModels;
+    }
+
+    @Override
+    public String[] getSpeechToTextModels() {
+        return speechToTextModels;
     }
 
     @Override

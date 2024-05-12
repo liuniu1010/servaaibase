@@ -125,6 +125,21 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         }
     }
 
+    @Override
+    public AIModel.ChatResponse audioToText(String model, AIModel.Attachment attachment) {
+        try {
+            return innerAudioToText(model, attachment);
+        }
+        catch(RuntimeException rex) {
+            logger.error(rex.getMessage(), rex);
+            throw rex;
+        }
+        catch(Exception ex) {
+            logger.error(ex.getMessage(), ex);
+            throw new RuntimeException(ex);
+        }
+    }
+
     private AIModel.ChatResponse innerFetchChatResponse(String model, AIModel.PromptStruct promptStruct, FunctionCallIFC functionCallIFC) throws Exception {
         int maxTokens = determineMaxTokens(model, promptStruct, functionCallIFC);
         AIModel.ChatResponse chatResponse = innerFetchChatResponse(model, promptStruct, maxTokens, functionCallIFC);
@@ -144,6 +159,13 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         String filePath = CommonUtil.normalizeFolderPath(onlineFileAbsolutePath) + File.separator + fileName;
         sendAndGenerateFile(model, jsonInput, filePath);
         return fileName;
+    }
+
+    private AIModel.ChatResponse innerAudioToText(String model, AIModel.Attachment attachment) throws Exception {
+        String jsonInput = generateJsonBodyForAudioToText(model, attachment);
+        String jsonResponse = send(model, jsonInput);
+        AIModel.ChatResponse chatResponse = extractTextFromAudioJson(jsonResponse);
+        return chatResponse;
     }
 
     private AIModel.Embedding innerGetEmbedding(String model, String input, int dimensions) throws Exception {
@@ -268,6 +290,11 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
             }
         }
         return calls; 
+    }
+
+    private AIModel.ChatResponse extractTextFromAudioJson(String jsonResponse) throws Exception {
+        // to be implemented
+        return null;
     }
 
     private AIModel.ChatResponse extractChatResponseFromJson(String jsonResponse) throws Exception {
@@ -466,6 +493,11 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         jsonBody.addProperty("output_format", textToSpeechPrompt.getOutputFormat());
 
         return gson.toJson(jsonBody);
+    }
+
+    private String generateJsonBodyForAudioToText(String model, AIModel.Attachment attachment) {
+        // to be implement
+        return null;
     }
 
     private void sendAndGenerateFile(String model, String jsonInput, String filePath) throws Exception {
