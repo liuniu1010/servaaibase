@@ -16,5 +16,5 @@ public interface SuperAIIFC {
     public AIModel.Embedding getEmbedding(String model, String input, int dimensions);
     public String[] generateImages(String model, AIModel.ImagePrompt imagePrompt);
     public String generateSpeech(String model, AIModel.TextToSpeechPrompt textToSpeechPrompt, String onlineFileAbsolutePath);
-    public AIModel.ChatResponse audioToText(String model, AIModel.Attachment attachment);
+    public AIModel.ChatResponse speechToText(String model, AIModel.Attachment attachment);
 }

@@ -264,13 +264,13 @@ class SpeechToTextTask implements DBQueryTaskIFC {
         OpenAIImpl openAI = OpenAIImpl.getInstance(dbConnection);
         String[] models = openAI.getSpeechToTextModels();
         for(String model: models) {
-            System.out.println("test audio to text with model [" + model + "]");
+            System.out.println("test speech to text with model [" + model + "]");
             System.out.println("filePath = " + filePath);
 
             AIModel.Attachment attachment = new AIModel.Attachment();
             attachment.setContent(filePath);
 
-            AIModel.ChatResponse chatResponse = openAI.audioToText(model, attachment);
+            AIModel.ChatResponse chatResponse = openAI.speechToText(model, attachment);
             System.out.println("response = " + chatResponse.getMessage());
         }
         return null; 

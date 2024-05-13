@@ -133,9 +133,9 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
     }
 
     @Override
-    public AIModel.ChatResponse audioToText(String model, AIModel.Attachment attachment) {
+    public AIModel.ChatResponse speechToText(String model, AIModel.Attachment attachment) {
         try {
-            return innerAudioToText(model, attachment);
+            return innerSpeechToText(model, attachment);
         }
         catch(RuntimeException rex) {
             logger.error(rex.getMessage(), rex);
@@ -168,10 +168,10 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         return fileName;
     }
 
-    private AIModel.ChatResponse innerAudioToText(String model, AIModel.Attachment attachment) throws Exception {
+    private AIModel.ChatResponse innerSpeechToText(String model, AIModel.Attachment attachment) throws Exception {
         String filePath = attachment.getContent();
         String jsonResponse = sendWithFormData(model, filePath);
-        AIModel.ChatResponse chatResponse = extractTextFromAudioJson(jsonResponse);
+        AIModel.ChatResponse chatResponse = extractTextFromSpeechJson(jsonResponse);
         return chatResponse;
     }
 
@@ -299,7 +299,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         return calls; 
     }
 
-    private AIModel.ChatResponse extractTextFromAudioJson(String jsonResponse) throws Exception {
+    private AIModel.ChatResponse extractTextFromSpeechJson(String jsonResponse) throws Exception {
         JsonElement element = JsonParser.parseString(jsonResponse);
         JsonObject jsonObject = element.getAsJsonObject();
         String text = jsonObject.get("text").getAsString();

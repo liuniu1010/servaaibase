@@ -118,7 +118,7 @@ abstract public class AbsGoogleAIImpl implements SuperAIIFC {
     }
 
     @Override
-    public AIModel.ChatResponse audioToText(String model, AIModel.Attachment attachment) {
+    public AIModel.ChatResponse speechToText(String model, AIModel.Attachment attachment) {
         // to be implemented
         return null;
     }
