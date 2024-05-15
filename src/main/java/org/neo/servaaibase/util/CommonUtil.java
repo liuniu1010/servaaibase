@@ -1,5 +1,7 @@
 package org.neo.servaaibase.util;
 
+import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Date;
 import java.util.Random;
@@ -8,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.text.SimpleDateFormat;
 import java.io.File;
+import java.io.IOException;
 
 import org.neo.servaframe.interfaces.DBConnectionIFC;
 import org.neo.servaframe.model.SQLStruct;
@@ -246,6 +249,70 @@ public class CommonUtil {
             return base64.substring(base64.indexOf(";base64,") + 8);
         }
         return base64; // If no prefix is present, return the original string
+    }
+
+    public static String base64ToFile(String base64, String onlineFileAbsolutePath) throws IOException {
+        String mimeType = extractMimeTypeFromBase64(base64);
+        String rawBase64 = extractRawBase64(base64); 
+        String extension = mimeTypeToExtenstion(mimeType);
+        String fileName = "upload_" + getRandomString(10) + extension;
+        String filePath = CommonUtil.normalizeFolderPath(onlineFileAbsolutePath) + File.separator + fileName;
+        IOUtil.rawBase64ToFile(rawBase64, filePath);
+        return fileName; 
+    }
+
+    private static final Map<String, String> mimeTypeToExtensionMap = new HashMap<>();
+    static {
+        mimeTypeToExtensionMap.put("text/plain", ".txt");
+        mimeTypeToExtensionMap.put("text/html", ".html");
+        mimeTypeToExtensionMap.put("text/css", ".css");
+        mimeTypeToExtensionMap.put("text/javascript", ".js");
+        mimeTypeToExtensionMap.put("text/csv", ".csv");
+        mimeTypeToExtensionMap.put("text/xml", ".xml");
+        mimeTypeToExtensionMap.put("image/jpeg", ".jpg");
+        mimeTypeToExtensionMap.put("image/png", ".png");
+        mimeTypeToExtensionMap.put("image/gif", ".gif");
+        mimeTypeToExtensionMap.put("image/bmp", ".bmp");
+        mimeTypeToExtensionMap.put("image/webp", ".webp");
+        mimeTypeToExtensionMap.put("image/svg+xml", ".svg");
+        mimeTypeToExtensionMap.put("image/tiff", ".tiff");
+        mimeTypeToExtensionMap.put("image/x-icon", ".ico");
+        mimeTypeToExtensionMap.put("audio/mpeg", ".mp3");
+        mimeTypeToExtensionMap.put("audio/wav", ".wav");
+        mimeTypeToExtensionMap.put("audio/ogg", ".ogg");
+        mimeTypeToExtensionMap.put("audio/aac", ".aac");
+        mimeTypeToExtensionMap.put("audio/webm", ".weba");
+        mimeTypeToExtensionMap.put("audio/flac", ".flac");
+        mimeTypeToExtensionMap.put("video/mp4", ".mp4");
+        mimeTypeToExtensionMap.put("video/mpeg", ".mpeg");
+        mimeTypeToExtensionMap.put("video/ogg", ".ogv");
+        mimeTypeToExtensionMap.put("video/webm", ".webm");
+        mimeTypeToExtensionMap.put("video/x-msvideo", ".avi");
+        mimeTypeToExtensionMap.put("video/quicktime", ".mov");
+        mimeTypeToExtensionMap.put("application/json", ".json");
+        mimeTypeToExtensionMap.put("application/xml", ".xml");
+        mimeTypeToExtensionMap.put("application/pdf", ".pdf");
+        mimeTypeToExtensionMap.put("application/zip", ".zip");
+        mimeTypeToExtensionMap.put("application/gzip", ".gz");
+        mimeTypeToExtensionMap.put("application/x-www-form-urlencoded", "");
+        mimeTypeToExtensionMap.put("application/octet-stream", ".bin");
+        mimeTypeToExtensionMap.put("application/msword", ".doc");
+        mimeTypeToExtensionMap.put("application/vnd.ms-excel", ".xls");
+        mimeTypeToExtensionMap.put("application/vnd.ms-powerpoint", ".ppt");
+        mimeTypeToExtensionMap.put("application/vnd.openxmlformats-officedocument.wordprocessingml.document", ".docx");
+        mimeTypeToExtensionMap.put("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", ".xlsx");
+        mimeTypeToExtensionMap.put("application/vnd.openxmlformats-officedocument.presentationml.presentation", ".pptx");
+        mimeTypeToExtensionMap.put("font/otf", ".otf");
+        mimeTypeToExtensionMap.put("font/ttf", ".ttf");
+        mimeTypeToExtensionMap.put("font/woff", ".woff");
+        mimeTypeToExtensionMap.put("font/woff2", ".woff2");
+        mimeTypeToExtensionMap.put("multipart/form-data", "");
+        mimeTypeToExtensionMap.put("multipart/byteranges", "");
+        mimeTypeToExtensionMap.put("multipart/alternative", "");
+    }
+
+    public static String mimeTypeToExtenstion(String mimeType) {
+        return mimeTypeToExtensionMap.getOrDefault(mimeType, "");
     }
 
     public static String getRandomString(int length) {
