@@ -142,7 +142,8 @@ public class CommonUtil {
         rendered += "\n<p>";
 
         if(chatRecord.getIsRequest()) {
-            rendered += RenderToShowAsOrigin(chatRecord.getContent());
+            // rendered += RenderToShowAsOrigin(chatRecord.getContent());
+            rendered += RenderToShowAsHtml(chatRecord.getContent());
         }
         else {
             rendered += RenderToShowAsHtml(chatRecord.getContent());
