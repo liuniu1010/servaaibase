@@ -365,7 +365,12 @@ abstract public class AbsGoogleAIImpl implements SuperAIIFC {
 
         // text of part
         JsonObject jsonUserPartOnText = new JsonObject();
-        jsonUserPartOnText.addProperty("text", promptStruct.getUserInput());
+        String adjustedInput = promptStruct.getUserInput();
+        if(promptStruct.getSystemHint() != null
+            && !promptStruct.getSystemHint().isEmpty()) {
+            adjustedInput = promptStruct.getSystemHint() + "\n" + promptStruct.getUserInput(); 
+        }
+        jsonUserPartOnText.addProperty("text", adjustedInput);
         jsonUserParts.add(jsonUserPartOnText);
 
         JsonObject userInputContent = new JsonObject();
