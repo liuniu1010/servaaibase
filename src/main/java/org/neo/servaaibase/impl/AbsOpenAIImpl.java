@@ -378,10 +378,15 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
 
     private JsonArray generateJsonArrayMessages(String model, AIModel.PromptStruct promptStruct) {
         JsonArray messages = new JsonArray();
+        String systemHint = getSystemHint();
+        if(promptStruct.getSystemHint() != null
+            && !promptStruct.getSystemHint().isEmpty()) {
+            systemHint = promptStruct.getSystemHint();  // caller has set system hint, use it
+        }
 
         JsonObject systemMessage = new JsonObject();
         systemMessage.addProperty("role", "system");
-        systemMessage.addProperty("content", getSystemHint());
+        systemMessage.addProperty("content", systemHint);
         messages.add(systemMessage);
 
         List<AIModel.ChatRecord> chatRecords = promptStruct.getChatRecords();

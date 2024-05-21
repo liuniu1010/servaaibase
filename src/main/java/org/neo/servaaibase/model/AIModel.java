@@ -80,6 +80,7 @@ public class AIModel {
     public static class PromptStruct {
         private List<AIModel.ChatRecord> chatRecords = new ArrayList<AIModel.ChatRecord>();
         private String userInput;
+        private String systemHint;
         private AIModel.AttachmentGroup attachmentGroup;
 
         public List<AIModel.ChatRecord> getChatRecords() {
@@ -96,6 +97,14 @@ public class AIModel {
 
         public void setUserInput(String inputUserInput) {
             userInput = inputUserInput;
+        }
+
+        public String getSystemHint() {
+            return systemHint;
+        }
+
+        public void setSystemHint(String inputSystemHint) {
+            systemHint = inputSystemHint;
         }
 
         public AIModel.AttachmentGroup getAttachmentGroup() {

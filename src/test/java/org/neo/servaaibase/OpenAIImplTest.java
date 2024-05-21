@@ -104,6 +104,39 @@ public class OpenAIImplTest
         }
     }
 
+    public void testSystemHint() throws Exception {
+        try {
+            DBServiceIFC dbService = ServiceFactory.getDBService();
+            dbService.executeQueryTask(new DBQueryTaskIFC() {
+                @Override
+                public Object query(DBConnectionIFC dbConnection) {
+                    OpenAIImpl openAI = OpenAIImpl.getInstance(dbConnection);
+                    String userInput1 = "Hello, how are you! I'm Neo, nice to meet you!";
+                    String userInput2 = "这是一段语言测试";
+                    String[] userInputs = new String[]{userInput1, userInput2};
+                    String systemHint = "You are a great language expert, you never response user prompt with your own idea, what you need to do is just translating input prompt, in case the input is English, you translate it into Chinese, in case the input is Chinese, you translate it into English";
+                    String[] models = openAI.getChatModels();
+                    for(String model: models) {
+                        System.out.println("test fetchChatResponse with model [" + model + "]");
+                        for(String userInput: userInputs) {
+                            System.out.println("userInput = " + userInput);
+                            AIModel.PromptStruct promptStruct = new AIModel.PromptStruct();
+                            promptStruct.setUserInput(userInput);
+                            promptStruct.setSystemHint(systemHint);
+                            AIModel.ChatResponse chatResponse = openAI.fetchChatResponse(model, promptStruct);
+                            System.out.println("response = " + chatResponse.getMessage());
+                        }
+                    }
+                    return null;
+                }
+            });
+        }
+        catch(Exception ex) {
+            System.out.println("ex.message = " + ex.getMessage());
+            throw ex;
+        }
+    }
+
     public void testVisionImage() throws Exception {
         try {
             String userInput = "Hello, please give me an description of the images";
