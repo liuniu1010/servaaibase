@@ -22,6 +22,7 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         return new OpenAIImpl(inputDBConnection);
     }
 
+    private static String gpt_4o = "gpt-4o";
     private static String gpt_4_turbo_preview = "gpt-4-turbo-preview";
     private static String gpt_35_turbo = "gpt-3.5-turbo";
     private static String text_embedding_3_large = "text-embedding-3-large";
@@ -45,14 +46,15 @@ public class OpenAIImpl extends AbsOpenAIImpl {
     private Map<String, Integer> maxOutputMapping;
 
     protected void setup() {
-        chatModels = new String[]{gpt_4_turbo_preview, gpt_35_turbo};
+        chatModels = new String[]{gpt_4o, gpt_4_turbo_preview, gpt_35_turbo};
         embeddingModels = new String[]{text_embedding_3_large, text_embedding_3_small};
         imageModels = new String[]{dall_e_3, dall_e_2};
-        visionModels = new String[]{gpt_4_vision_preview};
+        visionModels = new String[]{gpt_4o, gpt_4_vision_preview};
         textToSpeechModels = new String[]{tts_1, tts_1_hd};
         speechToTextModels = new String[]{whisper_1};
 
         urlMapping = new HashMap<String, String>();
+        urlMapping.put(gpt_4o, "https://api.openai.com/v1/chat/completions");
         urlMapping.put(gpt_4_turbo_preview, "https://api.openai.com/v1/chat/completions");
         urlMapping.put(gpt_35_turbo, "https://api.openai.com/v1/chat/completions");
         urlMapping.put(text_embedding_3_large, "https://api.openai.com/v1/embeddings");
@@ -65,11 +67,13 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         urlMapping.put(whisper_1, "https://api.openai.com/v1/audio/transcriptions");
 
         contextWindowMapping = new HashMap<String, Integer>();
+        contextWindowMapping.put(gpt_4o, 128000);
         contextWindowMapping.put(gpt_4_turbo_preview, 128000);
         contextWindowMapping.put(gpt_35_turbo, 16385);
         contextWindowMapping.put(gpt_4_vision_preview, 128000);
 
         maxOutputMapping = new HashMap<String, Integer>();
+        maxOutputMapping.put(gpt_4o, 4096);
         maxOutputMapping.put(gpt_4_turbo_preview, 4096);
         maxOutputMapping.put(gpt_35_turbo, 4096);
         maxOutputMapping.put(gpt_4_vision_preview, 4096);
@@ -149,7 +153,7 @@ public class OpenAIImpl extends AbsOpenAIImpl {
     }
 
     @Override
-    protected String getSystemHint() {
+    protected String getDefaultSystemHint() {
         return "You are a helpful assistant. You always response result in plain text.";
     }
 }

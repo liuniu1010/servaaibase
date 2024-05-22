@@ -40,7 +40,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
     abstract protected String getUrl(String model);
     abstract protected int getMaxOutputTokenNumber(String model);
     abstract protected int getContextWindow(String model);
-    abstract protected String getSystemHint();
+    abstract protected String getDefaultSystemHint();
 
     @Override
     public AIModel.ChatResponse fetchChatResponse(String model, AIModel.PromptStruct promptStruct) {
@@ -378,7 +378,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
 
     private JsonArray generateJsonArrayMessages(String model, AIModel.PromptStruct promptStruct) {
         JsonArray messages = new JsonArray();
-        String systemHint = getSystemHint();
+        String systemHint = getDefaultSystemHint();
         if(promptStruct.getSystemHint() != null
             && !promptStruct.getSystemHint().isEmpty()) {
             systemHint = promptStruct.getSystemHint();  // caller has set system hint, use it
