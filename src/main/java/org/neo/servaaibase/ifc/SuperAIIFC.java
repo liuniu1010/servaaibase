@@ -11,7 +11,6 @@ public interface SuperAIIFC {
     public String[] getTextToSpeechModels();
     public String[] getSpeechToTextModels();
     public AIModel.ChatResponse fetchChatResponse(String inputModel, AIModel.PromptStruct inputPromptStruct);
-    public AIModel.ChatResponse fetchChatResponse(String inputModel, AIModel.PromptStruct inputPromptStruct, FunctionCallIFC functionCallIFC);
     public AIModel.Embedding getEmbedding(String model, String input);
     public AIModel.Embedding getEmbedding(String model, String input, int dimensions);
     public String[] generateImages(String model, AIModel.ImagePrompt imagePrompt);

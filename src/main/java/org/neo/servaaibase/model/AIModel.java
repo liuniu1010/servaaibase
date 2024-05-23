@@ -11,6 +11,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 import org.neo.servaframe.model.VersionEntity;
+import org.neo.servaaibase.ifc.FunctionCallIFC;
 
 public class AIModel {
     public static class ChatRecord {
@@ -82,6 +83,7 @@ public class AIModel {
         private String userInput;
         private String systemHint;
         private AIModel.AttachmentGroup attachmentGroup;
+        private FunctionCallIFC functionCall;
 
         public List<AIModel.ChatRecord> getChatRecords() {
             return chatRecords;
@@ -113,6 +115,14 @@ public class AIModel {
 
         public void setAttachmentGroup(AIModel.AttachmentGroup inputAttachmentGroup) {
             attachmentGroup = inputAttachmentGroup;
+        }
+
+        public FunctionCallIFC getFunctionCall() {
+            return functionCall;
+        }
+
+        public void setFunctionCall(FunctionCallIFC inputFunctionCall) {
+            functionCall = inputFunctionCall;
         }
     }
 

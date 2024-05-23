@@ -36,22 +36,7 @@ abstract public class AbsGoogleAIImpl implements SuperAIIFC {
     @Override
     public AIModel.ChatResponse fetchChatResponse(String model, AIModel.PromptStruct promptStruct) {
         try {
-            return innerFetchChatResponse(model, promptStruct, null);
-        }
-        catch(RuntimeException rex) {
-            logger.error(rex.getMessage(), rex);
-            throw rex;
-        }
-        catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
-            throw new RuntimeException(ex);
-        }
-    }
-
-    @Override
-    public AIModel.ChatResponse fetchChatResponse(String model, AIModel.PromptStruct promptStruct, FunctionCallIFC functionCallIFC) {
-        try {
-            return innerFetchChatResponse(model, promptStruct, functionCallIFC);
+            return innerFetchChatResponse(model, promptStruct);
         }
         catch(RuntimeException rex) {
             logger.error(rex.getMessage(), rex);
@@ -139,14 +124,14 @@ abstract public class AbsGoogleAIImpl implements SuperAIIFC {
         return embedding;
     }
 
-    private AIModel.ChatResponse innerFetchChatResponse(String model, AIModel.PromptStruct promptStruct, FunctionCallIFC functionCallIFC) throws Exception {
-        int maxTokens = determineMaxTokens(model, promptStruct, functionCallIFC);
-        AIModel.ChatResponse chatResponse = innerFetchChatResponse(model, promptStruct, maxTokens, functionCallIFC);
+    private AIModel.ChatResponse innerFetchChatResponse(String model, AIModel.PromptStruct promptStruct) throws Exception {
+        int maxTokens = determineMaxTokens(model, promptStruct);
+        AIModel.ChatResponse chatResponse = innerFetchChatResponse(model, promptStruct, maxTokens);
         return chatResponse;
     }
 
-    private AIModel.ChatResponse innerFetchChatResponse(String model, AIModel.PromptStruct promptStruct, int maxTokens, FunctionCallIFC functionCallIFC) throws Exception {
-        String jsonInput = generateJsonBodyToFetchResponse(model, promptStruct, maxTokens, functionCallIFC);
+    private AIModel.ChatResponse innerFetchChatResponse(String model, AIModel.PromptStruct promptStruct, int maxTokens) throws Exception {
+        String jsonInput = generateJsonBodyToFetchResponse(model, promptStruct, maxTokens);
         String url = getUrl(model, "generateContent");
         String jsonResponse = send(model, url, jsonInput);
         List<AIModel.Call> calls = extractCallsFromJson(jsonResponse);
@@ -155,7 +140,7 @@ abstract public class AbsGoogleAIImpl implements SuperAIIFC {
         return chatResponse;
     }
 
-    private int determineMaxTokens(String model, AIModel.PromptStruct promptStruct, FunctionCallIFC functionCallIFC) throws Exception {
+    private int determineMaxTokens(String model, AIModel.PromptStruct promptStruct) throws Exception {
         return getMaxOutputTokenNumber(model);
     }
 
@@ -220,8 +205,8 @@ abstract public class AbsGoogleAIImpl implements SuperAIIFC {
         return calls;
     }
 
-    private int fetchPromptTokenNumber(String model, AIModel.PromptStruct promptStruct, FunctionCallIFC functionCallIFC) throws Exception {
-        String jsonInput = generateJsonBodyForGetTokenNumber(model, promptStruct, functionCallIFC);
+    private int fetchPromptTokenNumber(String model, AIModel.PromptStruct promptStruct) throws Exception {
+        String jsonInput = generateJsonBodyForGetTokenNumber(model, promptStruct);
         String url = getUrl(model, "countTokens");
         String jsonTokenNumber = send(model, url, jsonInput);
         int tokenNumber = extractTokenNumberFromJson(jsonTokenNumber);
@@ -235,14 +220,14 @@ abstract public class AbsGoogleAIImpl implements SuperAIIFC {
         return tokenNumber;
     }
 
-    private String generateJsonBodyForGetTokenNumber(String model, AIModel.PromptStruct promptStruct, FunctionCallIFC functionCallIFC) {
+    private String generateJsonBodyForGetTokenNumber(String model, AIModel.PromptStruct promptStruct) {
         Gson gson = new Gson();
         JsonObject jsonBody = new JsonObject();
         JsonArray jsonContents = generateJsonArrayContents(model, promptStruct);
         jsonBody.add("contents", jsonContents);
 
-        if(functionCallIFC != null) {
-            JsonArray tools = generateJsonArrayTools(functionCallIFC);
+        if(promptStruct.getFunctionCall() != null) {
+            JsonArray tools = generateJsonArrayTools(promptStruct.getFunctionCall());
             jsonBody.add("tools", tools);
         }
 
@@ -383,7 +368,7 @@ abstract public class AbsGoogleAIImpl implements SuperAIIFC {
     }
 
 
-    private String generateJsonBodyToFetchResponse(String model, AIModel.PromptStruct promptStruct, int maxTokens, FunctionCallIFC functionCallIFC) {
+    private String generateJsonBodyToFetchResponse(String model, AIModel.PromptStruct promptStruct, int maxTokens) {
         Gson gson = new Gson();
         JsonObject jsonBody = new JsonObject();
         JsonArray jsonContents = generateJsonArrayContents(model, promptStruct);
@@ -392,18 +377,18 @@ abstract public class AbsGoogleAIImpl implements SuperAIIFC {
         JsonObject jsonGenerationConfig = generateJsonObjectGenerationConfig(maxTokens);
         jsonBody.add("generationConfig", jsonGenerationConfig);
 
-        if(functionCallIFC != null) {
-            JsonArray tools = generateJsonArrayTools(functionCallIFC);
+        if(promptStruct.getFunctionCall() != null) {
+            JsonArray tools = generateJsonArrayTools(promptStruct.getFunctionCall());
             jsonBody.add("tools", tools);
         }
 
         return gson.toJson(jsonBody);
     }
 
-    private JsonArray generateJsonArrayTools(FunctionCallIFC functionCallIFC) {
+    private JsonArray generateJsonArrayTools(FunctionCallIFC functionCall) {
         JsonArray tools = new JsonArray();
 
-        List<AIModel.Function> functions = functionCallIFC.getFunctions();
+        List<AIModel.Function> functions = functionCall.getFunctions();
         for(AIModel.Function function: functions) {
             JsonObject jsonFunctionDeclaration = new JsonObject();
             jsonFunctionDeclaration.addProperty("name", function.getMethodName());

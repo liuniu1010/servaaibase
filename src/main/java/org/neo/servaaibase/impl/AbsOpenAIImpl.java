@@ -45,22 +45,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
     @Override
     public AIModel.ChatResponse fetchChatResponse(String model, AIModel.PromptStruct promptStruct) {
         try {
-            return innerFetchChatResponse(model, promptStruct, null);
-        }
-        catch(RuntimeException rex) {
-            logger.error(rex.getMessage(), rex);
-            throw rex;
-        }
-        catch(Exception ex) {
-            logger.error(ex.getMessage(), ex);
-            throw new RuntimeException(ex);
-        }
-    }
-
-    @Override
-    public AIModel.ChatResponse fetchChatResponse(String model, AIModel.PromptStruct promptStruct, FunctionCallIFC functionCallIFC) {
-        try {
-            return innerFetchChatResponse(model, promptStruct, functionCallIFC);
+            return innerFetchChatResponse(model, promptStruct);
         }
         catch(RuntimeException rex) {
             logger.error(rex.getMessage(), rex);
@@ -147,9 +132,9 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         }
     }
 
-    private AIModel.ChatResponse innerFetchChatResponse(String model, AIModel.PromptStruct promptStruct, FunctionCallIFC functionCallIFC) throws Exception {
-        int maxTokens = determineMaxTokens(model, promptStruct, functionCallIFC);
-        AIModel.ChatResponse chatResponse = innerFetchChatResponse(model, promptStruct, maxTokens, functionCallIFC);
+    private AIModel.ChatResponse innerFetchChatResponse(String model, AIModel.PromptStruct promptStruct) throws Exception {
+        int maxTokens = determineMaxTokens(model, promptStruct);
+        AIModel.ChatResponse chatResponse = innerFetchChatResponse(model, promptStruct, maxTokens);
         return chatResponse;
     }
 
@@ -182,10 +167,10 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         return embedding;
     }
 
-    private int determineMaxTokens(String model, AIModel.PromptStruct promptStruct, FunctionCallIFC functionCallIFC) throws Exception {
+    private int determineMaxTokens(String model, AIModel.PromptStruct promptStruct) throws Exception {
         boolean needCalculate = false; // calculate prompt token number or not
         if(needCalculate) { // in this way, calculate prompt token number first
-            int promptTokenNumber = fetchPromptTokenNumber(model, promptStruct, functionCallIFC);
+            int promptTokenNumber = fetchPromptTokenNumber(model, promptStruct);
             if(promptTokenNumber < 0) {
                 throw new RuntimeException("some error occurred for promptTokenNumber < 0");
             }
@@ -197,8 +182,8 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         }
     }
 
-    private AIModel.ChatResponse innerFetchChatResponse(String model, AIModel.PromptStruct promptStruct, int maxTokens, FunctionCallIFC functionCallIFC) throws Exception {
-        String jsonInput = generateJsonBodyToFetchResponse(model, promptStruct, maxTokens, functionCallIFC);
+    private AIModel.ChatResponse innerFetchChatResponse(String model, AIModel.PromptStruct promptStruct, int maxTokens) throws Exception {
+        String jsonInput = generateJsonBodyToFetchResponse(model, promptStruct, maxTokens);
         String jsonResponse = send(model, jsonInput);
         List<AIModel.Call> calls = extractCallsFromJson(jsonResponse);
         AIModel.ChatResponse chatResponse = extractChatResponseFromJson(jsonResponse);
@@ -206,8 +191,8 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         return chatResponse;
     }
 
-    private int fetchPromptTokenNumber(String model, AIModel.PromptStruct promptStruct, FunctionCallIFC functionCallIFC) throws Exception {
-        String jsonInput = generateJsonBodyForGetTokenNumber(model, promptStruct, functionCallIFC);
+    private int fetchPromptTokenNumber(String model, AIModel.PromptStruct promptStruct) throws Exception {
+        String jsonInput = generateJsonBodyForGetTokenNumber(model, promptStruct);
         String jsonTokenNumber = send(model, jsonInput);
         int tokenNumber = extractTokenNumberFromJson(jsonTokenNumber);
         return tokenNumber;
@@ -330,10 +315,10 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         return chatResponse; 
     }
 
-    private JsonArray generateJsonArrayTools(FunctionCallIFC functionCallIFC) {
+    private JsonArray generateJsonArrayTools(FunctionCallIFC functionCall) {
         JsonArray tools = new JsonArray();
 
-        List<AIModel.Function> functions = functionCallIFC.getFunctions();
+        List<AIModel.Function> functions = functionCall.getFunctions();
         for(AIModel.Function function: functions) {
             JsonObject jsonFunction = new JsonObject();
             jsonFunction.addProperty("name", function.getMethodName());
@@ -434,7 +419,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         return messages;
     }
 
-    private String generateJsonBodyForGetTokenNumber(String model, AIModel.PromptStruct promptStruct, FunctionCallIFC functionCallIFC) {
+    private String generateJsonBodyForGetTokenNumber(String model, AIModel.PromptStruct promptStruct) {
         Gson gson = new Gson();
         JsonObject jsonBody = new JsonObject();
 
@@ -447,14 +432,14 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         JsonArray messages = generateJsonArrayMessages(model, promptStruct);
         jsonBody.add("messages", messages);
 
-        if(functionCallIFC != null) {
-            JsonArray tools = generateJsonArrayTools(functionCallIFC);
+        if(promptStruct.getFunctionCall() != null) {
+            JsonArray tools = generateJsonArrayTools(promptStruct.getFunctionCall());
             jsonBody.add("tools", tools);
         }
         return gson.toJson(jsonBody);
     }
 
-    private String generateJsonBodyToFetchResponse(String model, AIModel.PromptStruct promptStruct, int maxTokens, FunctionCallIFC functionCallIFC) {
+    private String generateJsonBodyToFetchResponse(String model, AIModel.PromptStruct promptStruct, int maxTokens) {
         Gson gson = new Gson();
         JsonObject jsonBody = new JsonObject();
 
@@ -465,8 +450,8 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         JsonArray messages = generateJsonArrayMessages(model, promptStruct);
         jsonBody.add("messages", messages);
 
-        if(functionCallIFC != null) {
-            JsonArray tools = generateJsonArrayTools(functionCallIFC);
+        if(promptStruct.getFunctionCall() != null) {
+            JsonArray tools = generateJsonArrayTools(promptStruct.getFunctionCall());
             jsonBody.add("tools", tools);
         }
         return gson.toJson(jsonBody);
