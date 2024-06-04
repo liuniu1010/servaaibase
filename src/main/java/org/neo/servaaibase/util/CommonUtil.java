@@ -21,6 +21,8 @@ import org.neo.servaframe.interfaces.DBConnectionIFC;
 import org.neo.servaframe.model.SQLStruct;
 import org.neo.servaframe.util.IOUtil;
 import org.neo.servaaibase.model.AIModel;
+import com.google.gson.stream.JsonReader;
+import java.io.StringReader;
 
 public class CommonUtil {
     public static String getConfigValue(DBConnectionIFC dbConnection, String configName) {
@@ -348,7 +350,9 @@ public class CommonUtil {
 
     public static String alignJson(String compactJson) {
         Gson gson = new GsonBuilder().setLenient().setPrettyPrinting().create();
-        JsonElement jsonElement = JsonParser.parseString(compactJson);
+        JsonReader reader = new JsonReader(new StringReader(compactJson));
+        reader.setLenient(true);
+        JsonElement jsonElement = JsonParser.parseReader(reader);
         return gson.toJson(jsonElement);
     }
 }
