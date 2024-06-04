@@ -552,11 +552,14 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
                 throw new RuntimeException("Unexpected code " + response);
             }
 
-            return response.body().string();
+            String responseJson = response.body().string();
+            responseJson = CommonUtil.alignJson(responseJson);
+            return responseJson;
         }
     }
 
     private String send(String model, String jsonInput) throws Exception {
+        jsonInput = CommonUtil.alignJson(jsonInput);
         logger.debug("call openai api, model = " + model + ", jsonInput = " + jsonInput);
         URL url = new URL(getUrl(model));
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -574,6 +577,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
 
             try (InputStream in = connection.getInputStream()){
                 String response = IOUtil.inputStreamToString(in);
+                response = CommonUtil.alignJson(response);
                 logger.debug("return from openai api, response = " + response);
                 return response;
             }

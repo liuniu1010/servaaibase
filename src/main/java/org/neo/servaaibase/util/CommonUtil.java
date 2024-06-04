@@ -12,6 +12,11 @@ import java.text.SimpleDateFormat;
 import java.io.File;
 import java.io.IOException;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+
 import org.neo.servaframe.interfaces.DBConnectionIFC;
 import org.neo.servaframe.model.SQLStruct;
 import org.neo.servaframe.util.IOUtil;
@@ -339,6 +344,12 @@ public class CommonUtil {
     public static String getFileName(String filePath) {
         File file = new File(filePath);
         return file.getName();
+    }
+
+    public static String alignJson(String compactJson) {
+        Gson gson = new GsonBuilder().setLenient().setPrettyPrinting().create();
+        JsonElement jsonElement = JsonParser.parseString(compactJson);
+        return gson.toJson(jsonElement);
     }
 }
 
