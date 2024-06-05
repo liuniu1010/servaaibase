@@ -209,7 +209,7 @@ public class CommonUtil {
                 return stdResult;
             }
             else {
-                throw new RuntimeException(errResult);
+                throw new RuntimeException(stdResult + "\n" + errResult);
             }
         }
         catch(RuntimeException rex) {
