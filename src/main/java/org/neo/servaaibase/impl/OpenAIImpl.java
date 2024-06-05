@@ -6,6 +6,7 @@ import java.util.HashMap;
 import org.neo.servaframe.interfaces.DBConnectionIFC;
 import org.neo.servaaibase.model.AIModel;
 import org.neo.servaaibase.util.CommonUtil;
+import org.neo.servaaibase.NeoAIException;
 
 public class OpenAIImpl extends AbsOpenAIImpl {
     protected DBConnectionIFC dbConnection;
@@ -84,11 +85,11 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         try {
             return CommonUtil.getConfigValue(dbConnection, "OpenAiApiKey");
         }
-        catch(RuntimeException rex) {
-            throw rex;
+        catch(NeoAIException nex) {
+            throw nex;
         }
         catch(Exception ex) {
-            throw new RuntimeException(ex);
+            throw new NeoAIException(ex);
         }
     }
 

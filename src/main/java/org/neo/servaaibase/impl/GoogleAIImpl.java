@@ -6,6 +6,7 @@ import java.util.HashMap;
 import org.neo.servaframe.interfaces.DBConnectionIFC;
 import org.neo.servaaibase.model.AIModel;
 import org.neo.servaaibase.util.CommonUtil;
+import org.neo.servaaibase.NeoAIException;
 
 public class GoogleAIImpl extends AbsGoogleAIImpl {
     private DBConnectionIFC dbConnection;
@@ -62,11 +63,11 @@ public class GoogleAIImpl extends AbsGoogleAIImpl {
         try {
             return CommonUtil.getConfigValue(dbConnection, "GoogleApiKey");
         }
-        catch(RuntimeException rex) {
-            throw rex;
+        catch(NeoAIException nex) {
+            throw nex;
         }
         catch(Exception ex) {
-            throw new RuntimeException(ex);
+            throw new NeoAIException(ex);
         }
     }
 

@@ -10,6 +10,7 @@ import org.neo.servaframe.model.SQLStruct;
 import org.neo.servaframe.model.VersionEntity;
 import org.neo.servaaibase.ifc.StorageIFC;
 import org.neo.servaaibase.model.AIModel;
+import org.neo.servaaibase.NeoAIException;
 
 public class StorageInDBImpl implements StorageIFC {
     private DBConnectionIFC dbConnection;
@@ -29,11 +30,11 @@ public class StorageInDBImpl implements StorageIFC {
         try {
             return innerGetChatRecords(key);
         }
-        catch(RuntimeException rex) {
-            throw rex;
+        catch(NeoAIException nex) {
+            throw nex;
         }
         catch(Exception ex) {
-            throw new RuntimeException(ex);
+            throw new NeoAIException(ex);
         }
     }
 
@@ -58,11 +59,11 @@ public class StorageInDBImpl implements StorageIFC {
         try {
             innerAddChatRecord(key, chatRecord);
         }
-        catch(RuntimeException rex) {
-            throw rex;
+        catch(NeoAIException nex) {
+            throw nex;
         }
         catch(Exception ex) {
-            throw new RuntimeException(ex);
+            throw new NeoAIException(ex);
         }
     }
 
@@ -77,11 +78,11 @@ public class StorageInDBImpl implements StorageIFC {
         try {
             innerClearChatRecords(key);
         }
-        catch(RuntimeException rex) {
-            throw rex;
+        catch(NeoAIException nex) {
+            throw nex;
         }
         catch(Exception ex) {
-            throw new RuntimeException(ex);
+            throw new NeoAIException(ex);
         }
     }
 

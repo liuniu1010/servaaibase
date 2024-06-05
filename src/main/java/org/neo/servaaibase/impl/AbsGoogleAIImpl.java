@@ -11,8 +11,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-import org.apache.log4j.Logger;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -24,9 +22,10 @@ import org.neo.servaaibase.ifc.SuperAIIFC;
 import org.neo.servaaibase.ifc.FunctionCallIFC;
 import org.neo.servaaibase.model.AIModel;
 import org.neo.servaaibase.util.CommonUtil;
+import org.neo.servaaibase.NeoAIException;
 
 abstract public class AbsGoogleAIImpl implements SuperAIIFC {
-    final static Logger logger = Logger.getLogger(AbsGoogleAIImpl.class);
+    final static org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(AbsGoogleAIImpl.class);
 
     abstract protected String getApiKey();
     abstract protected String getUrl(String model, String action);
@@ -38,13 +37,13 @@ abstract public class AbsGoogleAIImpl implements SuperAIIFC {
         try {
             return innerFetchChatResponse(model, promptStruct);
         }
-        catch(RuntimeException rex) {
-            logger.error(rex.getMessage(), rex);
-            throw rex;
+        catch(NeoAIException nex) {
+            logger.error(nex.getMessage(), nex);
+            throw nex;
         }
         catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
-            throw new RuntimeException(ex);
+            throw new NeoAIException(ex);
         }
     }
 
@@ -53,13 +52,13 @@ abstract public class AbsGoogleAIImpl implements SuperAIIFC {
         try {
             return innerGetEmbedding(model, input, -1);
         }
-        catch(RuntimeException rex) {
-            logger.error(rex.getMessage(), rex);
-            throw rex;
+        catch(NeoAIException nex) {
+            logger.error(nex.getMessage(), nex);
+            throw nex;
         }
         catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
-            throw new RuntimeException(ex);
+            throw new NeoAIException(ex);
         }
     }
 
@@ -71,13 +70,13 @@ abstract public class AbsGoogleAIImpl implements SuperAIIFC {
         try {
             return innerGetEmbedding(model, input, dimensions);
         }
-        catch(RuntimeException rex) {
-            logger.error(rex.getMessage(), rex);
-            throw rex;
+        catch(NeoAIException nex) {
+            logger.error(nex.getMessage(), nex);
+            throw nex;
         }
         catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
-            throw new RuntimeException(ex);
+            throw new NeoAIException(ex);
         }
     }
 
@@ -86,13 +85,13 @@ abstract public class AbsGoogleAIImpl implements SuperAIIFC {
         try {
             return innerGenerateImage(model, imagePrompt);
         }
-        catch(RuntimeException rex) {
-            logger.error(rex.getMessage(), rex);
-            throw rex;
+        catch(NeoAIException nex) {
+            logger.error(nex.getMessage(), nex);
+            throw nex;
         }
         catch(Exception ex) {
             logger.error(ex.getMessage(), ex);
-            throw new RuntimeException(ex);
+            throw new NeoAIException(ex);
         }
     }
 
