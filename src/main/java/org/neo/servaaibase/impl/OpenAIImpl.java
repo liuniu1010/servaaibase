@@ -129,7 +129,7 @@ public class OpenAIImpl extends AbsOpenAIImpl {
             return urlMapping.get(model);
         }
         else {
-            throw new RuntimeException("model " + model + " not supported to get url!");
+            throw new NeoAIException("model " + model + " not supported to get url!");
         }
     }
 
@@ -139,7 +139,7 @@ public class OpenAIImpl extends AbsOpenAIImpl {
             return contextWindowMapping.get(model);
         }
         else {
-            throw new RuntimeException("model " + model + " not supported to get context window!");
+            throw new NeoAIException("model " + model + " not supported to get context window!");
         }
     }
 
@@ -149,7 +149,7 @@ public class OpenAIImpl extends AbsOpenAIImpl {
             return maxOutputMapping.get(model);
         }
         else {
-            throw new RuntimeException("model " + model + " not supported to get max output tokens!");
+            throw new NeoAIException("model " + model + " not supported to get max output tokens!");
         }
     }
 

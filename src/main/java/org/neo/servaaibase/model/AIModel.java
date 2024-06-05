@@ -12,6 +12,7 @@ import com.google.gson.JsonParser;
 
 import org.neo.servaframe.model.VersionEntity;
 import org.neo.servaaibase.ifc.FunctionCallIFC;
+import org.neo.servaaibase.NeoAIException;
 
 public class AIModel {
     public static class ChatRecord {
@@ -382,7 +383,7 @@ public class AIModel {
 
         public static AttachmentGroup fromJsonObject(JsonObject jsonObject) {
             if(!jsonObject.get("type").getAsString().equals("attachmentGroup")) {
-                throw new RuntimeException("this jsonObject is not an AttachmentGroup");
+                throw new NeoAIException("this jsonObject is not an AttachmentGroup");
             }
 
             AttachmentGroup attachmentGroup = new AttachmentGroup();
@@ -420,7 +421,7 @@ public class AIModel {
 
         public static Attachment fromJsonObject(JsonObject jsonObject) {
             if(!jsonObject.get("type").getAsString().equals("attachment")) {
-                throw new RuntimeException("this jsonObject is not an attachment");
+                throw new NeoAIException("this jsonObject is not an attachment");
             }
 
             Attachment attachment = new Attachment();

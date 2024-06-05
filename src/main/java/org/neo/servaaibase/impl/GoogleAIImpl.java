@@ -113,7 +113,7 @@ public class GoogleAIImpl extends AbsGoogleAIImpl {
             return maxOutputMapping.get(model);
         }
         else {
-            throw new RuntimeException("model " + model + " not supported to get max output tokens!");
+            throw new NeoAIException("model " + model + " not supported to get max output tokens!");
         }
     }
 
@@ -123,7 +123,7 @@ public class GoogleAIImpl extends AbsGoogleAIImpl {
             return maxInputMapping.get(model);
         }
         else {
-            throw new RuntimeException("model " + model + " not supported to get max input tokens!");
+            throw new NeoAIException("model " + model + " not supported to get max input tokens!");
         }
     }
 }

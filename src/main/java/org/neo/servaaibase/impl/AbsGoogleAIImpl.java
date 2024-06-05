@@ -333,7 +333,7 @@ abstract public class AbsGoogleAIImpl implements SuperAIIFC {
                 for(AIModel.Attachment attachment: attachments) {
                     String mimeType = CommonUtil.extractMimeTypeFromBase64(attachment.getContent());
                     if(mimeType == null) {
-                        throw new RuntimeException("the attachment doesn't have mime type");
+                        throw new NeoAIException("the attachment doesn't have mime type");
                     }
 
                     JsonObject jsonUserPartOnInline = new JsonObject();

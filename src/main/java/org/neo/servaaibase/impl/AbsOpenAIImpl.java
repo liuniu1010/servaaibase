@@ -171,7 +171,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         if(needCalculate) { // in this way, calculate prompt token number first
             int promptTokenNumber = fetchPromptTokenNumber(model, promptStruct);
             if(promptTokenNumber < 0) {
-                throw new RuntimeException("some error occurred for promptTokenNumber < 0");
+                throw new NeoAIException("some error occurred for promptTokenNumber < 0");
             }
 
             return Math.min(getMaxOutputTokenNumber(model), (getContextWindow(model) - promptTokenNumber));
@@ -548,7 +548,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
 
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) {
-                throw new RuntimeException("Unexpected code " + response);
+                throw new NeoAIException("Unexpected code " + response);
             }
 
             String responseJson = response.body().string();

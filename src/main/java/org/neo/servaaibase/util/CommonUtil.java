@@ -21,6 +21,8 @@ import org.neo.servaframe.interfaces.DBConnectionIFC;
 import org.neo.servaframe.model.SQLStruct;
 import org.neo.servaframe.util.IOUtil;
 import org.neo.servaaibase.model.AIModel;
+import org.neo.servaaibase.NeoAIException;
+
 import com.google.gson.stream.JsonReader;
 import java.io.StringReader;
 
@@ -35,11 +37,11 @@ public class CommonUtil {
             SQLStruct sqlStruct = new SQLStruct(sql, params);
             return (String)dbConnection.queryScalar(sqlStruct);
         }
-        catch(RuntimeException rex) {
-            throw rex;
+        catch(NeoAIException nex) {
+            throw nex;
         }
         catch(Exception ex) {
-            throw new RuntimeException(ex);
+            throw new NeoAIException(ex);
         }
     }
 
@@ -209,20 +211,20 @@ public class CommonUtil {
                 return stdResult;
             }
             else {
-                throw new RuntimeException(stdResult + "\n" + errResult);
+                throw new NeoAIException(stdResult + "\n" + errResult);
             }
         }
-        catch(RuntimeException rex) {
-            throw rex;
+        catch(NeoAIException nex) {
+            throw nex;
         }
         catch(Exception ex) {
-            throw new RuntimeException(ex);
+            throw new NeoAIException(ex);
         }
     }
 
     public static double consineSimilarity(AIModel.Embedding embeddingA, AIModel.Embedding embeddingB) {
         if(embeddingA.size() != embeddingB.size()) {
-            throw new RuntimeException("consineSimilartiy can only be applied with two embeddings with the same dimension");
+            throw new NeoAIException("consineSimilartiy can only be applied with two embeddings with the same dimension");
         }
 
         double dotProduct = 0.0;
