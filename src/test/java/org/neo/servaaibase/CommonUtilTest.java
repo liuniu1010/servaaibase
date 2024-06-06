@@ -52,7 +52,7 @@ public class CommonUtilTest
 
     public void testCommand() throws Exception {
         // String command = "/bin/sh -c \"ls -l | grep liuniu\"";
-        String command = "ls -l /tmp/ | grep mysql";
+        String command = "java -version";
         System.out.println("command = " + command);
         try {
             String result = CommonUtil.executeCommand(command);

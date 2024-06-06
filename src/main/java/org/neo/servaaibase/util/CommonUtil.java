@@ -208,7 +208,7 @@ public class CommonUtil {
             String errResult = IOUtil.inputStreamToString(process.getErrorStream());
             int exitCode = process.waitFor();
             if(exitCode == 0) {
-                return stdResult;
+                return stdResult + "\n" + errResult;
             }
             else {
                 throw new NeoAIException(stdResult + "\n" + errResult);
