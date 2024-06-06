@@ -6,6 +6,8 @@ import java.util.HashMap;
 public class NeoAIException extends RuntimeException {
     public static int NEOAIEXCEPTION_OTHER = 0;
     public static int NEOAIEXCEPTION_JSONSYNTAXERROR = 1;
+    public static int NEOAIEXCEPTION_IOEXCEPTIONWITHLLM = 2;
+   
     private static Map<Integer, String> defaultMapping = new HashMap<Integer, String>();
     static {
         defaultMapping.put(NEOAIEXCEPTION_OTHER, "other reason");

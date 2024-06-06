@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -514,6 +515,13 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
                 logger.debug("return from openai api, file [" + filePath +"] generated."); 
             }
         }
+        catch(IOException iex) {
+            try (InputStream errIn = connection.getErrorStream()) {
+                String errorResponse = IOUtil.inputStreamToString(errIn);
+                logger.error("get IOException from openai api, response = " + errorResponse, iex);
+            }
+            throw new NeoAIException(NeoAIException.NEOAIEXCEPTION_IOEXCEPTIONWITHLLM, iex);
+        }
         catch(Exception ex) {
             logger.error("get exeception in sending, " + ex.getMessage(), ex);
             try (InputStream errIn = connection.getErrorStream()) {
@@ -522,7 +530,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
                     logger.error("get exception from openai api, response = " + errorResponse);
                 }
             }
-            throw ex;
+            throw new NeoAIException(ex);
         }
         finally {
             connection.disconnect();
@@ -581,12 +589,19 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
                 return response;
             }
         }
+        catch(IOException iex) {
+            try (InputStream errIn = connection.getErrorStream()) {
+                String errorResponse = IOUtil.inputStreamToString(errIn);
+                logger.error("get IOException from openai api, response = " + errorResponse, iex);
+            }
+            throw new NeoAIException(NeoAIException.NEOAIEXCEPTION_IOEXCEPTIONWITHLLM, iex);
+        }
         catch(Exception ex) {
             try (InputStream errIn = connection.getErrorStream()) {
                 String errorResponse = IOUtil.inputStreamToString(errIn);
-                logger.error("get exception from openai api, response = " + errorResponse);
+                logger.error("get Exception from openai api, response = " + errorResponse, ex);
             }
-            throw ex;
+            throw new NeoAIException(ex);
         }
         finally {
             connection.disconnect();
