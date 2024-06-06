@@ -23,17 +23,17 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         return new OpenAIImpl(inputDBConnection);
     }
 
-    private static String gpt_4o = "gpt-4o";
-    private static String gpt_4_turbo_preview = "gpt-4-turbo-preview";
-    private static String gpt_35_turbo = "gpt-3.5-turbo";
-    private static String text_embedding_3_large = "text-embedding-3-large";
-    private static String text_embedding_3_small = "text-embedding-3-small";
-    private static String dall_e_3 = "dall-e-3";
-    private static String dall_e_2 = "dall-e-2";
-    private static String gpt_4_vision_preview = "gpt-4-vision-preview";
-    private static String tts_1 = "tts-1";
-    private static String tts_1_hd = "tts-1-hd";
-    private static String whisper_1 = "whisper-1";
+    public static String gpt_4o = "gpt-4o";
+    public static String gpt_4_turbo_preview = "gpt-4-turbo-preview";
+    public static String gpt_35_turbo = "gpt-3.5-turbo";
+    public static String text_embedding_3_large = "text-embedding-3-large";
+    public static String text_embedding_3_small = "text-embedding-3-small";
+    public static String dall_e_3 = "dall-e-3";
+    public static String dall_e_2 = "dall-e-2";
+    public static String gpt_4_vision_preview = "gpt-4-vision-preview";
+    public static String tts_1 = "tts-1";
+    public static String tts_1_hd = "tts-1-hd";
+    public static String whisper_1 = "whisper-1";
 
     private String[] chatModels;
     private String[] embeddingModels;
