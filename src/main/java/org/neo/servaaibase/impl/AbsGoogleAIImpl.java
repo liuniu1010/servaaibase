@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -456,12 +457,19 @@ abstract public class AbsGoogleAIImpl implements SuperAIIFC {
                 return response;
             }
         }
+        catch(IOException iex) {
+            try (InputStream errIn = connection.getErrorStream()) {
+                String errorResponse = IOUtil.inputStreamToString(errIn);
+                logger.error("get IOException from googleai api, response = " + errorResponse, iex);
+            }
+            throw new NeoAIException(NeoAIException.NEOAIEXCEPTION_IOEXCEPTIONWITHLLM, iex);
+        }
         catch(Exception ex) {
             try (InputStream errIn = connection.getErrorStream()) {
                 String errorResponse = IOUtil.inputStreamToString(errIn);
-                logger.error("get exception from googleai api, response = " + errorResponse);
+                logger.error("get Exception from googleai api, response = " + errorResponse, ex);
             }
-            throw ex;
+            throw new NeoAIException(ex);
         }
         finally {
             connection.disconnect();
