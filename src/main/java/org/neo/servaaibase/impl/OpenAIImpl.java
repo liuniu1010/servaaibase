@@ -83,7 +83,7 @@ public class OpenAIImpl extends AbsOpenAIImpl {
     @Override
     protected String getApiKey() {
         try {
-            return CommonUtil.randomChooseOpenAiApiKey(dbConnection);
+            return CommonUtil.getConfigValue(dbConnection, "OpenAiApiKey");
         }
         catch(NeoAIException nex) {
             throw nex;

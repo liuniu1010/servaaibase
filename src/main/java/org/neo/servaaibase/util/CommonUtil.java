@@ -45,29 +45,6 @@ public class CommonUtil {
         }
     }
 
-    public static String randomChooseOpenAiApiKey(DBConnectionIFC dbConnection) {
-        try {
-            String sql = "select configvalue";
-            sql += " from configs";
-            sql += " where configname like ?";
-            List<Object> params = new ArrayList<Object>();
-            params.add("OpenAiApiKey%");
-            SQLStruct sqlStruct = new SQLStruct(sql, params);
-
-            List<Map<String, Object>> keyMaps = dbConnection.query(sqlStruct);
-            Random random = new Random();
-            int index = random.nextInt(keyMaps.size());
-            Map<String, Object> keyMap = keyMaps.get(index);
-            return (String)keyMap.get("configvalue");
-        }
-        catch(NeoAIException nex) {
-            throw nex;
-        }
-        catch(Exception ex) {
-            throw new NeoAIException(ex);
-        }
-    }
-
     public static String dateToString(Date date, String format) {
         SimpleDateFormat dateFormat = new SimpleDateFormat(format);
         return dateFormat.format(date);

@@ -50,20 +50,6 @@ public class CommonUtilTest
         return new TestSuite( CommonUtilTest.class );
     }
 
-    public void testRandomChooseOpenAiApiKey() throws Exception {
-        DBServiceIFC dbService = ServiceFactory.getDBService();
-        dbService.executeQueryTask(new DBQueryTaskIFC() {
-            @Override
-            public Object query(DBConnectionIFC dbConnection) {
-                for(int i = 0;i < 5;i++) {
-                    String randomChoosedKey = CommonUtil.randomChooseOpenAiApiKey(dbConnection);
-                    System.out.println("randomChoosedKey = " + randomChoosedKey);
-                }
-                return null;
-            }
-        });
-    }
-
     public void testCommand() throws Exception {
         // String command = "/bin/sh -c \"ls -l | grep liuniu\"";
         String command = "java -version";
