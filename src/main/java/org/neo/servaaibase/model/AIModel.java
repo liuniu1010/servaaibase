@@ -49,7 +49,7 @@ public class AIModel {
             return (Date)versionEntity.getAttribute(CREATETIME);
         }
 
-        public void setChatTime(Date inputCreateTime) {
+        public void setCreateTime(Date inputCreateTime) {
             versionEntity.setAttribute(CREATETIME, inputCreateTime);
         }
 
