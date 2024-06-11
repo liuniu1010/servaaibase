@@ -62,4 +62,17 @@ public class StorageInMemoryImpl implements StorageIFC {
     public void clearChatRecords(Object key) {
         getBucket(key).clearChatRecords();
     }
+
+    @Override
+    public List<AIModel.CodeRecord> getCodeRecords(Object key) {
+        return null;
+    }
+
+    @Override
+    public void addCodeRecord(Object key, AIModel.CodeRecord codeRecord) {
+    }
+
+    @Override
+    public void clearCodeRecords(Object key) {
+    }
 }

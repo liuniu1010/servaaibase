@@ -94,4 +94,74 @@ public class StorageInDBImpl implements StorageIFC {
         SQLStruct sqlStruct = new SQLStruct(sql, params);
         dbConnection.execute(sqlStruct);
     }
+
+    @Override
+    public List<AIModel.CodeRecord> getCodeRecords(Object key) {
+        try {
+            return innerGetCodeRecords(key);
+        }
+        catch(NeoAIException nex) {
+            throw nex;
+        }
+        catch(Exception ex) {
+            throw new NeoAIException(ex);
+        }
+    }
+
+    private List<AIModel.CodeRecord> innerGetCodeRecords(Object key) throws Exception {
+        String sql = "select * from " + AIModel.CodeRecord.ENTITYNAME;
+        sql += " where " + AIModel.CodeRecord.SESSION + " = ?";
+        sql += " order by " + AIModel.CodeRecord.CREATETIME;
+        List<Object> params = new ArrayList<Object>();
+        params.add(key.toString());
+
+        SQLStruct sqlStruct = new SQLStruct(sql, params);
+        List<VersionEntity> versionEntityList = dbConnection.queryAsVersionEntity(AIModel.CodeRecord.ENTITYNAME, sqlStruct);
+        List<AIModel.CodeRecord> codeRecords = new ArrayList<AIModel.CodeRecord>();
+        for(VersionEntity versionEntity: versionEntityList) {
+            codeRecords.add(new AIModel.CodeRecord(versionEntity));
+        }
+        return codeRecords;
+    }
+
+    @Override
+    public void addCodeRecord(Object key, AIModel.CodeRecord codeRecord) {
+        try {
+            innerAddCodeRecord(key, codeRecord);
+        }
+        catch(NeoAIException nex) {
+            throw nex;
+        }
+        catch(Exception ex) {
+            throw new NeoAIException(ex);
+        }
+    }
+
+    private void innerAddCodeRecord(Object key, AIModel.CodeRecord codeRecord) throws Exception{
+        codeRecord.setSession(key.toString());
+        VersionEntity versionEntity = codeRecord.getVersionEntity();
+        dbConnection.insert(versionEntity);
+    }
+
+    @Override
+    public void clearCodeRecords(Object key) {
+        try {
+            innerClearCodeRecords(key);
+        }
+        catch(NeoAIException nex) {
+            throw nex;
+        }
+        catch(Exception ex) {
+            throw new NeoAIException(ex);
+        }
+    }
+
+    private void innerClearCodeRecords(Object key) throws Exception {
+        String sql = "delete from " + AIModel.CodeRecord.ENTITYNAME;
+        sql += " where " + AIModel.CodeRecord.SESSION + " = ?";
+        List<Object> params = new ArrayList<Object>();
+        params.add(key.toString());
+        SQLStruct sqlStruct = new SQLStruct(sql, params);
+        dbConnection.execute(sqlStruct);
+    }
 }

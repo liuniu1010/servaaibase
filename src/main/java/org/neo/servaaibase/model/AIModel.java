@@ -15,6 +15,61 @@ import org.neo.servaaibase.ifc.FunctionCallIFC;
 import org.neo.servaaibase.NeoAIException;
 
 public class AIModel {
+    public static class CodeRecord {
+        public static final String ENTITYNAME = "coderecord";
+        private VersionEntity versionEntity = null;
+
+        public static final String SESSION = "session";
+        public static final String CREATETIME = "createtime";
+        public static final String REQUIREMENT = "requirement";
+        public static final String CONTENT = "content";
+
+        public CodeRecord(VersionEntity inputVersionEntity) {
+            versionEntity = inputVersionEntity;
+        }
+
+        public CodeRecord(String session) {
+            versionEntity = new VersionEntity(ENTITYNAME);
+            versionEntity.setAttribute(SESSION, session);
+        }
+
+        public VersionEntity getVersionEntity() {
+            return versionEntity;
+        }
+
+        public String getSession() {
+            return (String)versionEntity.getAttribute(SESSION);
+        }
+
+        public void setSession(String session) {
+            versionEntity.setAttribute(SESSION, session);
+        }
+
+        public Date getCreateTime() {
+            return (Date)versionEntity.getAttribute(CREATETIME);
+        }
+
+        public void setChatTime(Date inputCreateTime) {
+            versionEntity.setAttribute(CREATETIME, inputCreateTime);
+        }
+
+        public String getRequirement() {
+            return (String)versionEntity.getAttribute(REQUIREMENT);
+        }
+
+        public void setRequirement(String inputRequirement) {
+            versionEntity.setAttribute(REQUIREMENT, inputRequirement);
+        }
+
+        public String getContent() {
+            return (String)versionEntity.getAttribute(CONTENT);
+        }
+
+        public void setContent(String inputContent) {
+            versionEntity.setAttribute(CONTENT, inputContent);
+        }
+    }
+
     public static class ChatRecord {
         public static final String ENTITYNAME = "chatrecord";
         private VersionEntity versionEntity = null;
