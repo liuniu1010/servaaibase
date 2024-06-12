@@ -176,7 +176,7 @@ public class CommonUtil {
         return renderFormat;
     }
 
-    private static boolean isUnix() {
+    public static boolean isUnix() {
         return File.separator.equals("/"); 
     }
 
@@ -196,6 +196,10 @@ public class CommonUtil {
             commandParts.add(matcher.group(1).replace("\"", ""));
         }
         return commandParts.toArray(new String[0]);
+    }
+
+    public static String executeCommandInSandBox(String command, String url) {
+        return executeCommand(command); // adjust later
     }
 
     public static String executeCommand(String command) {
