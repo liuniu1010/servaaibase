@@ -7,11 +7,13 @@ public class NeoAIException extends RuntimeException {
     public static int NEOAIEXCEPTION_OTHER = 0;
     public static int NEOAIEXCEPTION_JSONSYNTAXERROR = 1;
     public static int NEOAIEXCEPTION_IOEXCEPTIONWITHLLM = 2;
+    public static int NEOAIEXCEPTION_MAXITERATIONDEEP_EXCEED = 3;
    
     private static Map<Integer, String> defaultMapping = new HashMap<Integer, String>();
     static {
-        defaultMapping.put(NEOAIEXCEPTION_OTHER, "other reason");
+        defaultMapping.put(NEOAIEXCEPTION_OTHER, "Other reason");
         defaultMapping.put(NEOAIEXCEPTION_JSONSYNTAXERROR, "Json syntax error");
+        defaultMapping.put(NEOAIEXCEPTION_MAXITERATIONDEEP_EXCEED, "Exceed max iteration deep");
     }
 
     private int code;
