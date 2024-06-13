@@ -10,10 +10,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.text.SimpleDateFormat;
 import java.io.File;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
@@ -27,6 +36,7 @@ import com.google.gson.stream.JsonReader;
 import java.io.StringReader;
 
 public class CommonUtil {
+    final static org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(CommonUtil.class);
     public static String getConfigValue(DBConnectionIFC dbConnection, String configName) {
         try {
             String sql = "select configvalue";
@@ -198,8 +208,92 @@ public class CommonUtil {
         return commandParts.toArray(new String[0]);
     }
 
-    public static String executeCommandInSandBox(String command, String url) {
-        return executeCommand(command); // adjust later
+    private static String generateJsonBodyForCommandSandBox(String commandSandBox) {
+        Gson gson = new Gson();
+        JsonObject jsonBody = new JsonObject();
+
+        jsonBody.addProperty("session", "");
+        jsonBody.addProperty("userInput", commandSandBox);
+
+        return gson.toJson(jsonBody);
+    }
+
+    public static ResultSandBox extractResultSandBox(String jsonResultSandBox) {
+        Gson gson = new Gson();
+        return gson.fromJson(jsonResultSandBox, ResultSandBox.class);
+    }
+
+    static class ResultSandBox {
+        private boolean isSuccess;
+        private String message;
+
+        public boolean getIsSuccess() {
+            return isSuccess;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+    }
+
+    private static String sendCommandToSandBox(String jsonCommandSandBox, String sUrl) throws Exception {
+        String jsonInput = CommonUtil.alignJson(jsonCommandSandBox);
+        logger.debug("call sandbox api, jsonInput = " + jsonInput);
+        URL url = new URL(sUrl);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        try {
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setDoOutput(true);
+
+            try (OutputStream os = connection.getOutputStream()){
+                IOUtil.stringToOutputStream(jsonInput, os);
+            }
+
+            try (InputStream in = connection.getInputStream()){
+                String response = IOUtil.inputStreamToString(in);
+                response = CommonUtil.alignJson(response);
+                logger.debug("return from sandbox api, response = " + response);
+                return response;
+            }
+        }
+        catch(IOException iex) {
+            try (InputStream errIn = connection.getErrorStream()) {
+                String errorResponse = IOUtil.inputStreamToString(errIn);
+                logger.error("get IOException from sandbox api, response = " + errorResponse, iex);
+            }
+            throw new NeoAIException(NeoAIException.NEOAIEXCEPTION_IOEXCEPTIONWITHSANDBOX, iex);
+        }
+        catch(Exception ex) {
+            try (InputStream errIn = connection.getErrorStream()) {
+                String errorResponse = IOUtil.inputStreamToString(errIn);
+                logger.error("get Exception from sandbox api, response = " + errorResponse, ex);
+            }
+            throw new NeoAIException(ex);
+        }
+        finally {
+            connection.disconnect();
+        }
+    }
+
+    public static String executeCommandSandBox(String commandSandBox, String sUrl) {
+        try {
+            String jsonCommandSandBox = generateJsonBodyForCommandSandBox(commandSandBox);
+            String jsonResultSandBox = sendCommandToSandBox(jsonCommandSandBox, sUrl);
+            ResultSandBox resultSandBox = extractResultSandBox(jsonResultSandBox);
+            if(resultSandBox.getIsSuccess()) {
+                return resultSandBox.getMessage();
+            }
+            else {
+                throw new NeoAIException(resultSandBox.getMessage());
+            }
+        }
+        catch(NeoAIException nex) {
+            throw nex;
+        }
+        catch(Exception ex) {
+            throw new NeoAIException(ex);
+        }
     }
 
     public static String executeCommand(String command) {

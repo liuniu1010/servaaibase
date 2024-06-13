@@ -63,6 +63,15 @@ public class CommonUtilTest
         }
     }
 
+    public void testCommandSandBox() throws Exception {
+        String commandSandBox = "ls -l /tmp/";
+        String sUrl = "http://localhost:8080/ServaWeb/api/aisandbox/executecommand";
+
+        System.out.println("command = " + commandSandBox);
+        String response = CommonUtil.executeCommandSandBox(commandSandBox, sUrl);
+        System.out.println("response = " + response);
+    }
+
     public void testMimeTypeBase64() {
         String rawBase64 = "iVBORw0KGgoA";
         String mimeType = "image/png";
