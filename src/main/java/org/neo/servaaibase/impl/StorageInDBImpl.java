@@ -10,9 +10,11 @@ import org.neo.servaframe.model.SQLStruct;
 import org.neo.servaframe.model.VersionEntity;
 import org.neo.servaaibase.ifc.StorageIFC;
 import org.neo.servaaibase.model.AIModel;
+import org.neo.servaaibase.util.CommonUtil;
 import org.neo.servaaibase.NeoAIException;
 
 public class StorageInDBImpl implements StorageIFC {
+    private static int MAX_TEXT_BYTE_LENGTH = 65535;
     private DBConnectionIFC dbConnection;
     private StorageInDBImpl() {
     }
@@ -57,6 +59,7 @@ public class StorageInDBImpl implements StorageIFC {
     @Override
     public void addChatRecord(Object key, AIModel.ChatRecord chatRecord) {
         try {
+            chatRecord.setContent(CommonUtil.truncateText(chatRecord.getContent(), MAX_TEXT_BYTE_LENGTH));
             innerAddChatRecord(key, chatRecord);
         }
         catch(NeoAIException nex) {
@@ -127,6 +130,7 @@ public class StorageInDBImpl implements StorageIFC {
     @Override
     public void addCodeRecord(Object key, AIModel.CodeRecord codeRecord) {
         try {
+            codeRecord.setContent(CommonUtil.truncateText(codeRecord.getContent(), MAX_TEXT_BYTE_LENGTH));
             innerAddCodeRecord(key, codeRecord);
         }
         catch(NeoAIException nex) {

@@ -50,6 +50,22 @@ public class CommonUtilTest
         return new TestSuite( CommonUtilTest.class );
     }
 
+    public void testTruncateText() {
+        String str1 = "abcdefg";
+        String str2 = "abcdefghasifhasjfa;fja";
+        String str3 = "这是一";
+        String str4 = "这是一个测试语句";
+
+        System.out.println("str1 = " + str1);
+        System.out.println("truncate str1 = " + CommonUtil.truncateText(str1, 10));
+        System.out.println("str2 = " + str2);
+        System.out.println("truncate str2 = " + CommonUtil.truncateText(str2, 10));
+        System.out.println("str3 = " + str3);
+        System.out.println("truncate str3 = " + CommonUtil.truncateText(str3, 10));
+        System.out.println("str4 = " + str4);
+        System.out.println("truncate str4 = " + CommonUtil.truncateText(str4, 10));
+    }
+
     public void testCommand() throws Exception {
         // String command = "/bin/sh -c \"ls -l | grep liuniu\"";
         String command = "java -version";
@@ -68,7 +84,7 @@ public class CommonUtilTest
         String sUrl = "http://localhost:8080/ServaWeb/api/aisandbox/executecommand";
 
         System.out.println("command = " + commandSandBox);
-        String response = CommonUtil.executeCommandSandBox(commandSandBox, sUrl);
+        String response = CommonUtil.executeCommandSandBox("testsession", commandSandBox, sUrl);
         System.out.println("response = " + response);
     }
 

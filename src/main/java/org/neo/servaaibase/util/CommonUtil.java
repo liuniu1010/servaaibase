@@ -208,14 +208,22 @@ public class CommonUtil {
         return commandParts.toArray(new String[0]);
     }
 
-    private static String generateJsonBodyForCommandSandBox(String commandSandBox) {
+    private static String generateJsonBodyForSandBox(String session, String input) {
         Gson gson = new Gson();
         JsonObject jsonBody = new JsonObject();
 
-        jsonBody.addProperty("session", "");
-        jsonBody.addProperty("userInput", commandSandBox);
+        jsonBody.addProperty("session", session);
+        jsonBody.addProperty("userInput", input);
 
         return gson.toJson(jsonBody);
+    }
+
+    private static String generateJsonBodyForDownloadSandBox(String session, String projectFolder) {
+        return generateJsonBodyForSandBox(session, projectFolder);
+    }
+
+    private static String generateJsonBodyForCommandSandBox(String session, String commandSandBox) {
+        return generateJsonBodyForSandBox(session, commandSandBox);
     }
 
     public static ResultSandBox extractResultSandBox(String jsonResultSandBox) {
@@ -237,11 +245,21 @@ public class CommonUtil {
     }
 
     private static String sendCommandToSandBox(String jsonCommandSandBox, String sUrl) throws Exception {
-        String jsonInput = CommonUtil.alignJson(jsonCommandSandBox);
+        return sendInputToSandBox(jsonCommandSandBox, sUrl);
+    }
+
+    private static String sendDownloadInputToSandBox(String jsonDownloadInput, String sUrl) throws Exception {
+        return sendInputToSandBox(jsonDownloadInput, sUrl);
+    }
+
+    private static String sendInputToSandBox(String jsonInput, String sUrl) throws Exception {
+        jsonInput = CommonUtil.alignJson(jsonInput);
         logger.debug("call sandbox api, jsonInput = " + jsonInput);
-        URL url = new URL(sUrl);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        logger.debug("sUrl = " + sUrl);
+        HttpURLConnection connection = null;
         try {
+            URL url = new URL(sUrl);
+            connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setDoOutput(true);
@@ -272,13 +290,35 @@ public class CommonUtil {
             throw new NeoAIException(ex);
         }
         finally {
-            connection.disconnect();
+            if(connection != null) {
+                connection.disconnect();
+            }
         }
     }
 
-    public static String executeCommandSandBox(String commandSandBox, String sUrl) {
+    public static String downloadProjectSandBox(String session, String projectFolder, String sUrl) {
         try {
-            String jsonCommandSandBox = generateJsonBodyForCommandSandBox(commandSandBox);
+            String jsonDownloadInput = generateJsonBodyForDownloadSandBox(session, projectFolder);
+            String jsonResultSandBox = sendDownloadInputToSandBox(jsonDownloadInput, sUrl);
+            ResultSandBox resultSandBox = extractResultSandBox(jsonResultSandBox);
+            if(resultSandBox.getIsSuccess()) {
+                return resultSandBox.getMessage();
+            }
+            else {
+                throw new NeoAIException(resultSandBox.getMessage());
+            }
+        }
+        catch(NeoAIException nex) {
+            throw nex;
+        }
+        catch(Exception ex) {
+            throw new NeoAIException(ex);
+        }
+    }
+
+    public static String executeCommandSandBox(String session, String commandSandBox, String sUrl) {
+        try {
+            String jsonCommandSandBox = generateJsonBodyForCommandSandBox(session, commandSandBox);
             String jsonResultSandBox = sendCommandToSandBox(jsonCommandSandBox, sUrl);
             ResultSandBox resultSandBox = extractResultSandBox(jsonResultSandBox);
             if(resultSandBox.getIsSuccess()) {
@@ -318,6 +358,33 @@ public class CommonUtil {
         catch(Exception ex) {
             throw new NeoAIException(ex);
         }
+    }
+
+    public static String truncateText(String inputText, int maxByteLength) {
+        if (inputText == null) {
+            return null;
+        }
+
+        byte[] utf8Bytes = inputText.getBytes(StandardCharsets.UTF_8);
+        if (utf8Bytes.length <= maxByteLength) {
+            return inputText;
+        }
+
+        // Truncate the text to fit within the maximum byte length
+        int byteLength = 0;
+        int charLength = 0;
+
+        while (byteLength < maxByteLength && charLength < inputText.length()) {
+            char c = inputText.charAt(charLength);
+            byte[] charBytes = String.valueOf(c).getBytes(StandardCharsets.UTF_8);
+            if (byteLength + charBytes.length > maxByteLength) {
+                break;
+            }
+            byteLength += charBytes.length;
+            charLength++;
+        }
+
+        return inputText.substring(0, charLength);
     }
 
     public static double consineSimilarity(AIModel.Embedding embeddingA, AIModel.Embedding embeddingB) {
