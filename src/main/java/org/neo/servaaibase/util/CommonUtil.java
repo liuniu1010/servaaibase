@@ -275,17 +275,39 @@ public class CommonUtil {
                 return response;
             }
         }
+        catch(java.net.ConnectException cex) {
+            try (InputStream errIn = connection.getErrorStream()) {
+                if(errIn == null) {
+                    logger.error("get ConnectException from sandbox api, ", cex);
+                }
+                else {
+                    String errorResponse = IOUtil.inputStreamToString(errIn);
+                    logger.error("get ConnectException from sandbox api, response = " + errorResponse, cex);
+                }
+            }
+            throw new NeoAIException(NeoAIException.NEOAIEXCEPTION_IOEXCEPTIONWITHSANDBOX, "The associated sandbox is not ready", cex);
+        }
         catch(IOException iex) {
             try (InputStream errIn = connection.getErrorStream()) {
-                String errorResponse = IOUtil.inputStreamToString(errIn);
-                logger.error("get IOException from sandbox api, response = " + errorResponse, iex);
+                if(errIn == null) {
+                    logger.error("get IOException from sandbox api, ", iex);
+                }
+                else {
+                    String errorResponse = IOUtil.inputStreamToString(errIn);
+                    logger.error("get IOException from sandbox api, response = " + errorResponse, iex);
+                }
             }
-            throw new NeoAIException(NeoAIException.NEOAIEXCEPTION_IOEXCEPTIONWITHSANDBOX, iex);
+            throw new NeoAIException(NeoAIException.NEOAIEXCEPTION_IOEXCEPTIONWITHSANDBOX, "The associated sandbox is not ready", iex);
         }
         catch(Exception ex) {
             try (InputStream errIn = connection.getErrorStream()) {
-                String errorResponse = IOUtil.inputStreamToString(errIn);
-                logger.error("get Exception from sandbox api, response = " + errorResponse, ex);
+                if(errIn == null) {
+                    logger.error("get Exception from sandbox api, ", ex);
+                }
+                else {
+                    String errorResponse = IOUtil.inputStreamToString(errIn);
+                    logger.error("get Exception from sandbox api, response = " + errorResponse, ex);
+                }
             }
             throw new NeoAIException(ex);
         }

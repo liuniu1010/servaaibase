@@ -35,6 +35,11 @@ public class NeoAIException extends RuntimeException {
         code = inputCode;
     }
 
+    public NeoAIException(int inputCode, String inputMessage, Throwable cause) {
+        super(inputMessage, cause); 
+        code = inputCode;
+    }
+
     public NeoAIException(String inputMessage, Throwable cause) {
         super(inputMessage, cause);
         if(cause instanceof com.google.gson.JsonSyntaxException) {
