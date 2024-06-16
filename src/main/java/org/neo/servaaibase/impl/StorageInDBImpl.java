@@ -59,7 +59,7 @@ public class StorageInDBImpl implements StorageIFC {
     @Override
     public void addChatRecord(Object key, AIModel.ChatRecord chatRecord) {
         try {
-            chatRecord.setContent(CommonUtil.truncateText(chatRecord.getContent(), MAX_TEXT_BYTE_LENGTH));
+            chatRecord.setContent(CommonUtil.truncateTextFromStart(chatRecord.getContent(), MAX_TEXT_BYTE_LENGTH));
             innerAddChatRecord(key, chatRecord);
         }
         catch(NeoAIException nex) {
@@ -130,7 +130,7 @@ public class StorageInDBImpl implements StorageIFC {
     @Override
     public void addCodeRecord(Object key, AIModel.CodeRecord codeRecord) {
         try {
-            codeRecord.setContent(CommonUtil.truncateText(codeRecord.getContent(), MAX_TEXT_BYTE_LENGTH));
+            codeRecord.setContent(CommonUtil.truncateTextFromStart(codeRecord.getContent(), MAX_TEXT_BYTE_LENGTH));
             innerAddCodeRecord(key, codeRecord);
         }
         catch(NeoAIException nex) {

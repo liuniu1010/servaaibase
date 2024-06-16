@@ -56,14 +56,25 @@ public class CommonUtilTest
         String str3 = "这是一";
         String str4 = "这是一个测试语句";
 
+        System.out.println("truncate from start");
         System.out.println("str1 = " + str1);
-        System.out.println("truncate str1 = " + CommonUtil.truncateText(str1, 10));
+        System.out.println("truncate str1 = " + CommonUtil.truncateTextFromStart(str1, 10));
         System.out.println("str2 = " + str2);
-        System.out.println("truncate str2 = " + CommonUtil.truncateText(str2, 10));
+        System.out.println("truncate str2 = " + CommonUtil.truncateTextFromStart(str2, 10));
         System.out.println("str3 = " + str3);
-        System.out.println("truncate str3 = " + CommonUtil.truncateText(str3, 10));
+        System.out.println("truncate str3 = " + CommonUtil.truncateTextFromStart(str3, 10));
         System.out.println("str4 = " + str4);
-        System.out.println("truncate str4 = " + CommonUtil.truncateText(str4, 10));
+        System.out.println("truncate str4 = " + CommonUtil.truncateTextFromStart(str4, 10));
+
+        System.out.println("\ntruncate from end");
+        System.out.println("str1 = " + str1);
+        System.out.println("truncate str1 = " + CommonUtil.truncateTextFromEnd(str1, 10));
+        System.out.println("str2 = " + str2);
+        System.out.println("truncate str2 = " + CommonUtil.truncateTextFromEnd(str2, 10));
+        System.out.println("str3 = " + str3);
+        System.out.println("truncate str3 = " + CommonUtil.truncateTextFromEnd(str3, 10));
+        System.out.println("str4 = " + str4);
+        System.out.println("truncate str4 = " + CommonUtil.truncateTextFromEnd(str4, 10));
     }
 
     public void testCommand() throws Exception {

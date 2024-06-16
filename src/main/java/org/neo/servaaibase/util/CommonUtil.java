@@ -360,7 +360,7 @@ public class CommonUtil {
         }
     }
 
-    public static String truncateText(String inputText, int maxByteLength) {
+    public static String truncateTextFromStart(String inputText, int maxByteLength) {
         if (inputText == null) {
             return null;
         }
@@ -384,7 +384,35 @@ public class CommonUtil {
             charLength++;
         }
 
+        System.out.println("charLength = " + charLength);
         return inputText.substring(0, charLength);
+    }
+
+    public static String truncateTextFromEnd(String inputText, int maxByteLength) {
+        if (inputText == null) {
+            return null;
+        }
+
+        byte[] utf8Bytes = inputText.getBytes(StandardCharsets.UTF_8);
+        if (utf8Bytes.length <= maxByteLength) {
+            return inputText;
+        }
+
+        // Truncate the text to fit within the maximum byte length from the end
+        int byteLength = 0;
+        int charLength = inputText.length();
+
+        while (byteLength < maxByteLength && charLength > 0) {
+            char c = inputText.charAt(charLength - 1);
+            byte[] charBytes = String.valueOf(c).getBytes(StandardCharsets.UTF_8);
+            if (byteLength + charBytes.length > maxByteLength) {
+                break;
+            }
+            byteLength += charBytes.length;
+            charLength--;
+        }
+
+        return inputText.substring(charLength);
     }
 
     public static double consineSimilarity(AIModel.Embedding embeddingA, AIModel.Embedding embeddingB) {
