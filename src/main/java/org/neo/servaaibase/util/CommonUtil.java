@@ -20,6 +20,11 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Base64;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -571,6 +576,59 @@ public class CommonUtil {
         reader.setLenient(true);
         JsonElement jsonElement = JsonParser.parseReader(reader);
         return gson.toJson(jsonElement);
+    }
+
+    private static byte[] getSalt() throws NoSuchAlgorithmException {
+        SecureRandom sr = SecureRandom.getInstanceStrong();
+        byte[] salt = new byte[16];
+        sr.nextBytes(salt);
+        return salt;
+    }
+
+    public static String getSaltedHash(String input) {
+        try {
+            byte[] salt = getSalt();
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.update(salt);
+            byte[] hashedPassword = md.digest(input.getBytes());
+
+            byte[] saltHash = new byte[salt.length + hashedPassword.length];
+            System.arraycopy(salt, 0, saltHash, 0, salt.length);
+            System.arraycopy(hashedPassword, 0, saltHash, salt.length, hashedPassword.length);
+
+            return Base64.getEncoder().encodeToString(saltHash);
+        } catch (NoSuchAlgorithmException e) {
+            throw new NeoAIException(e);
+        }
+    }
+
+    public static boolean checkPassword(String input, String storedSaltedHash) {
+        try {
+            byte[] saltHash = Base64.getDecoder().decode(storedSaltedHash);
+
+            // Extract salt
+            byte[] salt = new byte[16];
+            System.arraycopy(saltHash, 0, salt, 0, 16);
+
+            // Hash the input with the extracted salt
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.update(salt);
+            byte[] hashedInput = md.digest(input.getBytes());
+
+            // Extract the stored hash part
+            byte[] storedHash = new byte[saltHash.length - 16];
+            System.arraycopy(saltHash, 16, storedHash, 0, storedHash.length);
+
+            // Compare hashes
+            for (int i = 0; i < storedHash.length; i++) {
+                if (storedHash[i] != hashedInput[i]) {
+                    return false;
+                }
+            }
+            return true;
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 

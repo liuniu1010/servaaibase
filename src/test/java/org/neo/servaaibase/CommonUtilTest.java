@@ -168,5 +168,25 @@ public class CommonUtilTest
         String fileName = CommonUtil.getFileName(filePath);
         assertEquals(fileName, "audio.mp3");
     }
+
+    public void testSaltHash() {
+        String input = "someplaintext";
+        
+        String saltHash1 = CommonUtil.getSaltedHash(input);
+        String saltHash2 = CommonUtil.getSaltedHash(input);
+        System.out.println("input = " + input); 
+        System.out.println("saltHash1 = " + saltHash1); 
+        System.out.println("saltHash2 = " + saltHash2);
+
+        System.out.println("saltHash1.length = " + saltHash1.length());
+
+        boolean check1 = CommonUtil.checkPassword(input, saltHash1);
+        boolean check2 = CommonUtil.checkPassword(input, saltHash2);
+        boolean check3 = CommonUtil.checkPassword(input + "s", saltHash2);
+
+        assertTrue(check1);
+        assertTrue(check2);
+        assertFalse(check3);
+    }
 }
 
