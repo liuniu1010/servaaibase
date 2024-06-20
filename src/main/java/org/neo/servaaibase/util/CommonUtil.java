@@ -61,6 +61,15 @@ public class CommonUtil {
         }
     }
 
+    public static int getConfigValueAsInt(DBConnectionIFC dbConnection, String configName) {
+        String sValue = getConfigValue(dbConnection, configName);
+        if(sValue == null) {
+            throw new NeoAIException("There is no config for " + configName);
+        }
+
+        return Integer.parseInt(sValue);
+    }
+
     public static String dateToString(Date date, String format) {
         SimpleDateFormat dateFormat = new SimpleDateFormat(format);
         return dateFormat.format(date);
