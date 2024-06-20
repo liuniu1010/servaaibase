@@ -188,5 +188,29 @@ public class CommonUtilTest
         assertTrue(check2);
         assertFalse(check3);
     }
+
+    public void testEmailAddress() {
+        String[] testEmails = {
+            "test@example.com",
+            "invalid-email",
+            "another.test@domain.co",
+            "user@domaincom",
+            "user@domain.c"
+        };
+
+        for (String email : testEmails) {
+            System.out.println(email + ": " + CommonUtil.isValidEmail(email));
+        }
+    }
+
+    public void testAddTimeSpan() {
+        Date date = new Date();
+        Date date1 = CommonUtil.addTimeSpan(date, Calendar.MINUTE, 30);
+        Date date2 = CommonUtil.addTimeSpan(date, Calendar.MONTH, 6);
+
+        System.out.println("date = " + date);
+        System.out.println("date1 = " + date1);
+        System.out.println("date2 = " + date2);
+    }
 }
 

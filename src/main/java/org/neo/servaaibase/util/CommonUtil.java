@@ -3,6 +3,7 @@ package org.neo.servaaibase.util;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 import java.util.ArrayList;
@@ -629,6 +630,28 @@ public class CommonUtil {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static final String EMAIL_REGEX = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
+    private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX);
+    public static boolean isValidEmail(String email) {
+        if (email == null) {
+            return false;
+        }
+
+        Matcher matcher = EMAIL_PATTERN.matcher(email);
+        return matcher.matches();
+    }
+
+    /***
+     * the field could be Calendar.MINUTE, Calendar.MONTH, etc
+     *
+    */
+    public static Date addTimeSpan(Date date, int field, int amount) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(field, amount);
+        return calendar.getTime();
     }
 }
 
