@@ -9,6 +9,7 @@ public class NeoAIException extends RuntimeException {
     public static int NEOAIEXCEPTION_IOEXCEPTIONWITHLLM = 2;
     public static int NEOAIEXCEPTION_IOEXCEPTIONWITHSANDBOX = 3;
     public static int NEOAIEXCEPTION_MAXITERATIONDEEP_EXCEED = 4;
+    public static int NEOAIEXCEPTION_SESSION_INVALID = 5;
    
     private static Map<Integer, String> defaultMapping = new HashMap<Integer, String>();
     static {
@@ -17,6 +18,7 @@ public class NeoAIException extends RuntimeException {
         defaultMapping.put(NEOAIEXCEPTION_IOEXCEPTIONWITHLLM, "IO Exceptin with LLM");
         defaultMapping.put(NEOAIEXCEPTION_IOEXCEPTIONWITHSANDBOX, "IO Exceptin with sand box");
         defaultMapping.put(NEOAIEXCEPTION_MAXITERATIONDEEP_EXCEED, "Exceed max iteration deep");
+        defaultMapping.put(NEOAIEXCEPTION_SESSION_INVALID, "Session Invalid");
     }
 
     private int code;
