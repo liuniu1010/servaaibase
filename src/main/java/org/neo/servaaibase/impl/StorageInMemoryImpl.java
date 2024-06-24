@@ -3,7 +3,7 @@ package org.neo.servaaibase.impl;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.neo.servaaibase.ifc.StorageIFC;
 import org.neo.servaaibase.model.AIModel;
@@ -23,9 +23,23 @@ public class StorageInMemoryImpl implements StorageIFC {
         public void clearChatRecords() {
             chatRecords.clear();
         }
+
+        private List<AIModel.CodeRecord> codeRecords = new ArrayList<AIModel.CodeRecord>();
+
+        public List<AIModel.CodeRecord> getCodeRecords() {
+            return codeRecords;
+        } 
+
+        public void addCodeRecord(AIModel.CodeRecord codeRecord) {
+            codeRecords.add(codeRecord);
+        }
+
+        public void clearCodeRecords() {
+            codeRecords.clear();
+        }
     }
 
-    private Map<Object, StorageInMemoryImpl.Bucket> buckets = new HashMap<Object, StorageInMemoryImpl.Bucket>(); // not thread safe, it could be changed to CurrencyHashMap in need
+    private Map<Object, StorageInMemoryImpl.Bucket> buckets = new ConcurrentHashMap<Object, StorageInMemoryImpl.Bucket>();
     private StorageInMemoryImpl.Bucket getBucket(Object key) {
         if(!buckets.containsKey(key)) {
             StorageInMemoryImpl.Bucket bucket = new StorageInMemoryImpl.Bucket();
@@ -65,14 +79,16 @@ public class StorageInMemoryImpl implements StorageIFC {
 
     @Override
     public List<AIModel.CodeRecord> getCodeRecords(Object key) {
-        return null;
+        return getBucket(key).getCodeRecords();
     }
 
     @Override
     public void addCodeRecord(Object key, AIModel.CodeRecord codeRecord) {
+        getBucket(key).addCodeRecord(codeRecord);
     }
 
     @Override
     public void clearCodeRecords(Object key) {
+        getBucket(key).clearCodeRecords();
     }
 }

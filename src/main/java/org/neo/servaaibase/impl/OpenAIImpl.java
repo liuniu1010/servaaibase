@@ -12,11 +12,16 @@ public class OpenAIImpl extends AbsOpenAIImpl {
     protected DBConnectionIFC dbConnection;
 
     protected OpenAIImpl() {
+        setup();
     }
 
     protected OpenAIImpl(DBConnectionIFC inputDBConnection) {
         dbConnection = inputDBConnection;
         setup();
+    }
+
+    public static OpenAIImpl getInstance() {
+        return new OpenAIImpl();
     }
 
     public static OpenAIImpl getInstance(DBConnectionIFC inputDBConnection) {
@@ -46,7 +51,7 @@ public class OpenAIImpl extends AbsOpenAIImpl {
     private Map<String, Integer> contextWindowMapping;
     private Map<String, Integer> maxOutputMapping;
 
-    protected void setup() {
+    private void setup() {
         chatModels = new String[]{gpt_4o, gpt_4_turbo_preview, gpt_35_turbo};
         embeddingModels = new String[]{text_embedding_3_large, text_embedding_3_small};
         imageModels = new String[]{dall_e_3, dall_e_2};
@@ -83,7 +88,12 @@ public class OpenAIImpl extends AbsOpenAIImpl {
     @Override
     protected String getApiKey() {
         try {
-            return CommonUtil.getConfigValue(dbConnection, "OpenAiApiKey");
+            if(dbConnection != null) {
+                return CommonUtil.getConfigValue(dbConnection, "OpenAiApiKey");
+            }
+            else {
+                return CommonUtil.getConfigValue("OpenAiApiKey");
+            }
         }
         catch(NeoAIException nex) {
             throw nex;

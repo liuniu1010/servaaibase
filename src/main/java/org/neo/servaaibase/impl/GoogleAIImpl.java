@@ -12,11 +12,16 @@ public class GoogleAIImpl extends AbsGoogleAIImpl {
     private DBConnectionIFC dbConnection;
 
     protected GoogleAIImpl() {
+        setup();
     }
 
     protected GoogleAIImpl(DBConnectionIFC inputDBConnection) {
         dbConnection = inputDBConnection;
         setup();
+    }
+
+    public static GoogleAIImpl getInstance() {
+        return new GoogleAIImpl();
     }
 
     public static GoogleAIImpl getInstance(DBConnectionIFC inputDBConnection) {
@@ -61,7 +66,12 @@ public class GoogleAIImpl extends AbsGoogleAIImpl {
     @Override
     protected String getApiKey() {
         try {
-            return CommonUtil.getConfigValue(dbConnection, "GoogleApiKey");
+            if(dbConnection != null) {
+                return CommonUtil.getConfigValue(dbConnection, "GoogleApiKey");
+            }
+            else {
+                return CommonUtil.getConfigValue("GoogleApiKey");
+            }
         }
         catch(NeoAIException nex) {
             throw nex;

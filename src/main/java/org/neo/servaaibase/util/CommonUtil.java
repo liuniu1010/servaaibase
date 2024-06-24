@@ -33,6 +33,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 import org.neo.servaframe.interfaces.DBConnectionIFC;
+import org.neo.servaframe.interfaces.DBServiceIFC;
+import org.neo.servaframe.interfaces.DBQueryTaskIFC;
+import org.neo.servaframe.ServiceFactory;
 import org.neo.servaframe.model.SQLStruct;
 import org.neo.servaframe.util.IOUtil;
 import org.neo.servaaibase.model.AIModel;
@@ -43,6 +46,16 @@ import java.io.StringReader;
 
 public class CommonUtil {
     final static org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(CommonUtil.class);
+    public static String getConfigValue(String configName) {
+        DBServiceIFC dbService = ServiceFactory.getDBService();
+        return (String)dbService.executeQueryTask(new DBQueryTaskIFC() {
+            @Override
+            public Object query(DBConnectionIFC dbConnection) {
+                return CommonUtil.getConfigValue(dbConnection, configName);
+            }
+        });
+    }
+
     public static String getConfigValue(DBConnectionIFC dbConnection, String configName) {
         try {
             String sql = "select configvalue";
@@ -59,6 +72,15 @@ public class CommonUtil {
         catch(Exception ex) {
             throw new NeoAIException(ex);
         }
+    }
+
+    public static int getConfigValueAsInt(String configName) {
+        String sValue = getConfigValue(configName);
+        if(sValue == null) {
+            throw new NeoAIException("There is no config for " + configName);
+        }
+
+        return Integer.parseInt(sValue);
     }
 
     public static int getConfigValueAsInt(DBConnectionIFC dbConnection, String configName) {
