@@ -11,6 +11,7 @@ public class NeoAIException extends RuntimeException {
     public static int NEOAIEXCEPTION_MAXITERATIONDEEP_EXCEED = 4;
     public static int NEOAIEXCEPTION_SESSION_INVALID = 5;
     public static int NEOAIEXCEPTION_LOGIN_FAIL = 6;
+    public static int NEOAIEXCEPTION_NOCREDITS_LEFT = 7;
    
     private static Map<Integer, String> defaultMapping = new HashMap<Integer, String>();
     static {
@@ -21,6 +22,7 @@ public class NeoAIException extends RuntimeException {
         defaultMapping.put(NEOAIEXCEPTION_MAXITERATIONDEEP_EXCEED, "Exceed max iteration deep");
         defaultMapping.put(NEOAIEXCEPTION_SESSION_INVALID, "Session Invalid");
         defaultMapping.put(NEOAIEXCEPTION_LOGIN_FAIL, "Username and password not matched");
+        defaultMapping.put(NEOAIEXCEPTION_NOCREDITS_LEFT, "No credits left");
     }
 
     private int code;
