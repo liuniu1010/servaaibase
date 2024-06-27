@@ -25,6 +25,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 
 import org.neo.servaframe.util.IOUtil;
 import org.neo.servaaibase.ifc.SuperAIIFC;
@@ -263,6 +264,9 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
                     call.setMethodName(functionObject.get("name").getAsString());
 
                     String argumentsString = functionObject.get("arguments").getAsString();
+                    List<AIModel.CallParam> callParams = extractArgumentsString(argumentsString);
+                    call.setParams(callParams);
+/*
                     JsonElement elementArguments = JsonParser.parseString(argumentsString);
                     JsonObject argumentsObject = elementArguments.getAsJsonObject();
                     if(argumentsObject != null
@@ -277,11 +281,48 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
                         }
                         call.setParams(callParams);
                     }
+*/
                     calls.add(call);
                 }
             }
         }
         return calls; 
+    }
+
+    private boolean isJsonString(String argumentsString) {
+        try {
+            JsonParser.parseString(argumentsString);
+            return true;
+        } catch (JsonSyntaxException ex) {
+            return false;
+        }
+    }
+
+    // it seems this is openai's bug, handle possible bugs in this method
+    private List<AIModel.CallParam> extractArgumentsString(String argumentsString) {
+        List<AIModel.CallParam> callParams = new ArrayList<AIModel.CallParam>();
+        if(isJsonString(argumentsString)) { // by design it should be a json string, sometimes it return a normal string
+            JsonElement elementArguments = JsonParser.parseString(argumentsString);
+            JsonObject argumentsObject = elementArguments.getAsJsonObject();
+            if(argumentsObject != null
+                && !argumentsObject.isJsonNull()) {
+                Set<String> paramNames = argumentsObject.keySet();
+                for(String paramName: paramNames) {
+                    AIModel.CallParam callParam = new AIModel.CallParam();
+                    callParam.setName(paramName);
+                    callParam.setValue(argumentsObject.get(paramName).getAsString());
+                    callParams.add(callParam);
+                }
+            }
+        }
+        else {
+            AIModel.CallParam callParam = new AIModel.CallParam();
+            callParam.setName(AIModel.CallParam.UNKNOWN);
+            callParam.setValue(argumentsString);
+            callParams.add(callParam);
+        }
+
+        return callParams;
     }
 
     private AIModel.ChatResponse extractTextFromSpeechJson(String jsonResponse) throws Exception {

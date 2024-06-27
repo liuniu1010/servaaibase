@@ -321,6 +321,7 @@ public class AIModel {
     }
 
     public static class CallParam {
+        public static String UNKNOWN = "unknown";
         private String name;
         private String value;
 
