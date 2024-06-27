@@ -212,5 +212,13 @@ public class CommonUtilTest
         System.out.println("date1 = " + date1);
         System.out.println("date2 = " + date2);
     }
+
+    public void testGetCountryIsoCode() throws Exception {
+        String IP = "49.225.45.115";
+        // String IP = "192.168.0.3";
+        System.out.println("IP = " + IP);
+        String isoCode = CommonUtil.getCountryIsoCode(IP);
+        System.out.println("isoCode = " + isoCode);
+    }
 }
 

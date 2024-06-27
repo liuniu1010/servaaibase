@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 
 import java.security.MessageDigest;
@@ -31,6 +32,11 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+
+import com.maxmind.geoip2.DatabaseReader;
+import com.maxmind.geoip2.exception.GeoIp2Exception;
+import com.maxmind.geoip2.model.CountryResponse;
+import com.maxmind.geoip2.record.Country;
 
 import org.neo.servaframe.interfaces.DBConnectionIFC;
 import org.neo.servaframe.interfaces.DBServiceIFC;
@@ -683,6 +689,18 @@ public class CommonUtil {
         calendar.setTime(date);
         calendar.add(field, amount);
         return calendar.getTime();
+    }
+
+    public static String getCountryIsoCode(String ipAddress) throws IOException, GeoIp2Exception {
+        ClassLoader classLoader = CommonUtil.class.getClassLoader();
+        String fileName = "GeoLite2-Country.mmdb";
+        InputStream database = classLoader.getResourceAsStream(fileName);
+        DatabaseReader reader = new DatabaseReader.Builder(database).build();
+
+        InetAddress ipAddressObject = InetAddress.getByName(ipAddress);
+        CountryResponse response = reader.country(ipAddressObject);
+        Country country = response.getCountry();
+        return country.getIsoCode();
     }
 }
 
