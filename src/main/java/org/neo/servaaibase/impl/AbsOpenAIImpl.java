@@ -487,7 +487,12 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         jsonBody.addProperty("model", model);
         jsonBody.addProperty("max_tokens", maxTokens);
         jsonBody.addProperty("temperature", 0.5);
-
+/*
+        if(promptStruct.getFunctionCall() != null) {
+            jsonBody.addProperty("tool_choice", "required");
+            jsonBody.addProperty("parallel_tool_calls", false);
+        }
+*/
         JsonArray messages = generateJsonArrayMessages(model, promptStruct);
         jsonBody.add("messages", messages);
 
