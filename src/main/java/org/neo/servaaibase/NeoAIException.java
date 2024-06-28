@@ -15,7 +15,8 @@ public class NeoAIException extends RuntimeException {
     public static int NEOAIEXCEPTION_IN_MAINTENANCE = 8;
     public static int NEOAIEXCEPTION_USERNAME_IN_BLACKLIST = 9;
     public static int NEOAIEXCEPTION_IP_IN_BLACKLIST = 10;
-    public static int NEOAIEXCEPTION_REGION_IN_BLACKLIST = 11;
+    public static int NEOAIEXCEPTION_REGION_NOTIN_WHITELIST = 11;
+    public static int NEOAIEXCEPTION_REGION_IN_BLACKLIST = 12;
    
     private static Map<Integer, String> defaultMapping = new HashMap<Integer, String>();
     static {
@@ -30,6 +31,7 @@ public class NeoAIException extends RuntimeException {
         defaultMapping.put(NEOAIEXCEPTION_IN_MAINTENANCE, "System in maintenance");
         defaultMapping.put(NEOAIEXCEPTION_USERNAME_IN_BLACKLIST, "Username in black list");
         defaultMapping.put(NEOAIEXCEPTION_IP_IN_BLACKLIST, "IP is not in service range");
+        defaultMapping.put(NEOAIEXCEPTION_REGION_NOTIN_WHITELIST, "Region is not in service range");
         defaultMapping.put(NEOAIEXCEPTION_REGION_IN_BLACKLIST, "Region is not in service range");
     }
 
@@ -46,6 +48,11 @@ public class NeoAIException extends RuntimeException {
 
     public NeoAIException(int inputCode, Throwable cause) {
         super(cause.getMessage(), cause); 
+        code = inputCode;
+    }
+
+    public NeoAIException(int inputCode, String inputMessage) {
+        super(inputMessage); 
         code = inputCode;
     }
 
