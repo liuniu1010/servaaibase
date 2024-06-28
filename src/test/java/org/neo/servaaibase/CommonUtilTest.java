@@ -213,12 +213,25 @@ public class CommonUtilTest
         System.out.println("date2 = " + date2);
     }
 
-    public void testGetCountryIsoCode() throws Exception {
+    public void testGetCountryIsoCodeAlpha2ByIP() throws Exception {
         String IP = "49.225.45.115";
         // String IP = "192.168.0.3";
         System.out.println("IP = " + IP);
-        String isoCode = CommonUtil.getCountryIsoCode(IP);
+        String isoCode = CommonUtil.getCountryIsoCodeAlpha2ByIP(IP);
         System.out.println("isoCode = " + isoCode);
+    }
+
+    public void testGetCountryIsoCodeAlpha2ByCountry() throws Exception {
+        // List of supported countries and territories
+        String[] countries = {
+            "New Zealand", "China", "United States", "Canada", "United Kingdom", "Australia", "Germany", "France"
+            // Add the rest of the countries
+        };
+
+        for(String country: countries) {
+            String isoCode = CommonUtil.getCountryIsoCodeAlpha2ByCountry(country);
+            System.out.println(country + ": " + isoCode);
+        } 
     }
 }
 

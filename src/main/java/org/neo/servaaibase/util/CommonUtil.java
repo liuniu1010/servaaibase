@@ -38,6 +38,8 @@ import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.maxmind.geoip2.model.CountryResponse;
 import com.maxmind.geoip2.record.Country;
 
+import com.neovisionaries.i18n.CountryCode;
+
 import org.neo.servaframe.interfaces.DBConnectionIFC;
 import org.neo.servaframe.interfaces.DBServiceIFC;
 import org.neo.servaframe.interfaces.DBQueryTaskIFC;
@@ -691,7 +693,7 @@ public class CommonUtil {
         return calendar.getTime();
     }
 
-    public static String getCountryIsoCode(String ipAddress) throws IOException, GeoIp2Exception {
+    public static String getCountryIsoCodeAlpha2ByIP(String ipAddress) throws IOException, GeoIp2Exception {
         ClassLoader classLoader = CommonUtil.class.getClassLoader();
         String fileName = "GeoLite2-Country.mmdb";
         InputStream database = classLoader.getResourceAsStream(fileName);
@@ -701,6 +703,22 @@ public class CommonUtil {
         CountryResponse response = reader.country(ipAddressObject);
         Country country = response.getCountry();
         return country.getIsoCode();
+    }
+
+    public static String getCountryIsoCodeAlpha2ByCountry(String country) {
+        CountryCode countryCode = CountryCode.findByName(country).stream().findFirst().orElse(null);
+        if(countryCode != null) {
+            return countryCode.getAlpha2();
+        }
+        return null;
+    }
+
+    public static String getCountryIsoCodeAlpha3ByCountry(String country) {
+        CountryCode countryCode = CountryCode.findByName(country).stream().findFirst().orElse(null);
+        if(countryCode != null) {
+            return countryCode.getAlpha3();
+        }
+        return null;
     }
 }
 
