@@ -224,7 +224,7 @@ public class CommonUtilTest
     public void testGetCountryIsoCodeAlpha2ByCountry() throws Exception {
         // List of supported countries and territories
         String[] countries = {
-            "New Zealand", "China", "United States", "Canada", "United Kingdom", "Australia", "Germany", "France"
+            "Bolivia, Plurinational State of"
             // Add the rest of the countries
         };
 
@@ -232,6 +232,21 @@ public class CommonUtilTest
             String isoCode = CommonUtil.getCountryIsoCodeAlpha2ByCountry(country);
             System.out.println(country + ": " + isoCode);
         } 
+    }
+
+    public void testGetAllSupportedCountries() throws Exception {
+        String fileName = "WhiteListRegions.txt";
+
+        List<String> countries = ConfigUtil.getTextFileInLines(fileName);
+        for(String country: countries) {
+            String isoCode = CommonUtil.getCountryIsoCodeAlpha2ByCountry(country);
+            if(isoCode == null) {
+                System.out.println("country = " + country + ", isoCode = " + isoCode);
+            }
+            else {
+                System.out.println(isoCode);
+            }
+        }
     }
 }
 
