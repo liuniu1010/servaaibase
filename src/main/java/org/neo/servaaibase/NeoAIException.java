@@ -12,6 +12,10 @@ public class NeoAIException extends RuntimeException {
     public static int NEOAIEXCEPTION_SESSION_INVALID = 5;
     public static int NEOAIEXCEPTION_LOGIN_FAIL = 6;
     public static int NEOAIEXCEPTION_NOCREDITS_LEFT = 7;
+    public static int NEOAIEXCEPTION_IN_MAINTENANCE = 8;
+    public static int NEOAIEXCEPTION_USERNAME_IN_BLACKLIST = 9;
+    public static int NEOAIEXCEPTION_IP_IN_BLACKLIST = 10;
+    public static int NEOAIEXCEPTION_REGION_IN_BLACKLIST = 11;
    
     private static Map<Integer, String> defaultMapping = new HashMap<Integer, String>();
     static {
@@ -23,6 +27,10 @@ public class NeoAIException extends RuntimeException {
         defaultMapping.put(NEOAIEXCEPTION_SESSION_INVALID, "Session Invalid");
         defaultMapping.put(NEOAIEXCEPTION_LOGIN_FAIL, "Username and password not matched");
         defaultMapping.put(NEOAIEXCEPTION_NOCREDITS_LEFT, "No credits left");
+        defaultMapping.put(NEOAIEXCEPTION_IN_MAINTENANCE, "System in maintenance");
+        defaultMapping.put(NEOAIEXCEPTION_USERNAME_IN_BLACKLIST, "Username in black list");
+        defaultMapping.put(NEOAIEXCEPTION_IP_IN_BLACKLIST, "IP is not in service range");
+        defaultMapping.put(NEOAIEXCEPTION_REGION_IN_BLACKLIST, "Region is not in service range");
     }
 
     private int code;
