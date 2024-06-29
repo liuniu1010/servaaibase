@@ -17,6 +17,8 @@ public class NeoAIException extends RuntimeException {
     public static int NEOAIEXCEPTION_IP_IN_BLACKLIST = 10;
     public static int NEOAIEXCEPTION_REGION_NOTIN_WHITELIST = 11;
     public static int NEOAIEXCEPTION_REGION_IN_BLACKLIST = 12;
+    public static int NEOAIEXCEPTION_MAXREGISTERNUMBER_EXCEED = 13;
+    public static int NEOAIEXCEPTION_MAXONLINENUMBER_EXCEED = 14;
    
     private static Map<Integer, String> defaultMapping = new HashMap<Integer, String>();
     static {
@@ -33,6 +35,8 @@ public class NeoAIException extends RuntimeException {
         defaultMapping.put(NEOAIEXCEPTION_IP_IN_BLACKLIST, "IP is not in service range");
         defaultMapping.put(NEOAIEXCEPTION_REGION_NOTIN_WHITELIST, "Region is not in service range");
         defaultMapping.put(NEOAIEXCEPTION_REGION_IN_BLACKLIST, "Region is not in service range");
+        defaultMapping.put(NEOAIEXCEPTION_MAXREGISTERNUMBER_EXCEED, "Exceed max register number");
+        defaultMapping.put(NEOAIEXCEPTION_MAXONLINENUMBER_EXCEED, "Exceed max online number, please wait some moments and login again");
     }
 
     private int code;
