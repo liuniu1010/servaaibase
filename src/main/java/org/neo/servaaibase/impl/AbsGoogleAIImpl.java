@@ -437,7 +437,7 @@ abstract public class AbsGoogleAIImpl implements SuperAIIFC {
 
     private String send(String model, String url, String jsonInput) throws Exception {
         jsonInput = CommonUtil.alignJson(jsonInput);
-        logger.debug("call googleai api, model = " + model + ", jsonInput = " + jsonInput);
+        logger.info("call googleai api, model = " + model + ", jsonInput = " + jsonInput);
         HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
         try {
             connection.setRequestMethod("POST");
@@ -453,7 +453,7 @@ abstract public class AbsGoogleAIImpl implements SuperAIIFC {
             try (InputStream in = connection.getInputStream()){
                 String response = IOUtil.inputStreamToString(in);
                 response = CommonUtil.alignJson(response);
-                logger.debug("return from googleai api, response = " + response);
+                logger.info("return from googleai api, response = " + response);
                 return response;
             }
         }

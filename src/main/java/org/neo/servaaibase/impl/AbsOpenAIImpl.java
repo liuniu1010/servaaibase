@@ -541,7 +541,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
     }
 
     private void sendAndGenerateFile(String model, String jsonInput, String filePath) throws Exception {
-        logger.debug("call openai api, model = " + model + ", jsonInput = " + jsonInput);
+        logger.info("call openai api, model = " + model + ", jsonInput = " + jsonInput);
         URL url = new URL(getUrl(model));
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         try {
@@ -558,7 +558,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
 
             try (InputStream in = connection.getInputStream()){
                 IOUtil.inputStreamToFile(in, filePath);
-                logger.debug("return from openai api, file [" + filePath +"] generated."); 
+                logger.info("return from openai api, file [" + filePath +"] generated."); 
             }
         }
         catch(IOException iex) {
@@ -613,7 +613,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
 
     private String send(String model, String jsonInput) throws Exception {
         jsonInput = CommonUtil.alignJson(jsonInput);
-        logger.debug("call openai api, model = " + model + ", jsonInput = " + jsonInput);
+        logger.info("call openai api, model = " + model + ", jsonInput = " + jsonInput);
         URL url = new URL(getUrl(model));
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         try {
@@ -631,7 +631,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
             try (InputStream in = connection.getInputStream()){
                 String response = IOUtil.inputStreamToString(in);
                 response = CommonUtil.alignJson(response);
-                logger.debug("return from openai api, response = " + response);
+                logger.info("return from openai api, response = " + response);
                 return response;
             }
         }
