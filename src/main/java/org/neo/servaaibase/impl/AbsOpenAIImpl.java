@@ -261,27 +261,16 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
 
                     JsonObject functionObject = tool.getAsJsonObject("function");
                     AIModel.Call call = new AIModel.Call();
-                    call.setMethodName(functionObject.get("name").getAsString());
+                    String methodName = functionObject.get("name").getAsString();
+                    if(methodName.startsWith("multi_tool_use")) {
+                        // not support this case
+                        continue;
+                    }
+                    call.setMethodName(methodName);
 
                     String argumentsString = functionObject.get("arguments").getAsString();
                     List<AIModel.CallParam> callParams = extractArgumentsString(argumentsString);
                     call.setParams(callParams);
-/*
-                    JsonElement elementArguments = JsonParser.parseString(argumentsString);
-                    JsonObject argumentsObject = elementArguments.getAsJsonObject();
-                    if(argumentsObject != null
-                        && !argumentsObject.isJsonNull()) {
-                        Set<String> paramNames = argumentsObject.keySet();
-                        List<AIModel.CallParam> callParams = new ArrayList<AIModel.CallParam>();
-                        for(String paramName: paramNames) {
-                            AIModel.CallParam callParam = new AIModel.CallParam();
-                            callParam.setName(paramName);
-                            callParam.setValue(argumentsObject.get(paramName).getAsString());
-                            callParams.add(callParam);
-                        }
-                        call.setParams(callParams);
-                    }
-*/
                     calls.add(call);
                 }
             }
