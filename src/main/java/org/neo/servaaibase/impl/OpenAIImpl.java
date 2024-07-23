@@ -28,6 +28,7 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         return new OpenAIImpl(inputDBConnection);
     }
 
+    public static String gpt_4o_mini = "gpt-4o-mini";
     public static String gpt_4o = "gpt-4o";
     public static String gpt_4_turbo_preview = "gpt-4-turbo-preview";
     public static String gpt_35_turbo = "gpt-3.5-turbo";
@@ -52,14 +53,15 @@ public class OpenAIImpl extends AbsOpenAIImpl {
     private Map<String, Integer> maxOutputMapping;
 
     private void setup() {
-        chatModels = new String[]{gpt_4o, gpt_4_turbo_preview, gpt_35_turbo};
+        chatModels = new String[]{gpt_4o_mini, gpt_4o, gpt_4_turbo_preview, gpt_35_turbo};
         embeddingModels = new String[]{text_embedding_3_large, text_embedding_3_small};
         imageModels = new String[]{dall_e_3, dall_e_2};
-        visionModels = new String[]{gpt_4o, gpt_4_vision_preview};
+        visionModels = new String[]{gpt_4o_mini, gpt_4o, gpt_4_vision_preview};
         textToSpeechModels = new String[]{tts_1, tts_1_hd};
         speechToTextModels = new String[]{whisper_1};
 
         urlMapping = new HashMap<String, String>();
+        urlMapping.put(gpt_4o_mini, "https://api.openai.com/v1/chat/completions");
         urlMapping.put(gpt_4o, "https://api.openai.com/v1/chat/completions");
         urlMapping.put(gpt_4_turbo_preview, "https://api.openai.com/v1/chat/completions");
         urlMapping.put(gpt_35_turbo, "https://api.openai.com/v1/chat/completions");
@@ -73,12 +75,14 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         urlMapping.put(whisper_1, "https://api.openai.com/v1/audio/transcriptions");
 
         contextWindowMapping = new HashMap<String, Integer>();
+        contextWindowMapping.put(gpt_4o_mini, 128000);
         contextWindowMapping.put(gpt_4o, 128000);
         contextWindowMapping.put(gpt_4_turbo_preview, 128000);
         contextWindowMapping.put(gpt_35_turbo, 16385);
         contextWindowMapping.put(gpt_4_vision_preview, 128000);
 
         maxOutputMapping = new HashMap<String, Integer>();
+        maxOutputMapping.put(gpt_4o_mini, 4096);
         maxOutputMapping.put(gpt_4o, 4096);
         maxOutputMapping.put(gpt_4_turbo_preview, 4096);
         maxOutputMapping.put(gpt_35_turbo, 4096);
