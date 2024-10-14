@@ -42,6 +42,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
     abstract protected int getMaxOutputTokenNumber(String model);
     abstract protected int getContextWindow(String model);
     abstract protected String getDefaultSystemHint();
+    abstract protected boolean isSupportSystemHint(String model);
 
     @Override
     public AIModel.ChatResponse fetchChatResponse(String model, AIModel.PromptStruct promptStruct) {
@@ -400,7 +401,12 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         }
 
         JsonObject systemMessage = new JsonObject();
-        systemMessage.addProperty("role", "system");
+        if(isSupportSystemHint(model)) {
+            systemMessage.addProperty("role", "system");
+        }
+        else {
+            systemMessage.addProperty("role", "user");
+        }
         systemMessage.addProperty("content", systemHint);
         messages.add(systemMessage);
 
@@ -474,14 +480,6 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         JsonObject jsonBody = new JsonObject();
 
         jsonBody.addProperty("model", model);
-        jsonBody.addProperty("max_tokens", maxTokens);
-        jsonBody.addProperty("temperature", 0.5);
-/*
-        if(promptStruct.getFunctionCall() != null) {
-            jsonBody.addProperty("tool_choice", "required");
-            jsonBody.addProperty("parallel_tool_calls", false);
-        }
-*/
         JsonArray messages = generateJsonArrayMessages(model, promptStruct);
         jsonBody.add("messages", messages);
 

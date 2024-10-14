@@ -28,6 +28,8 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         return new OpenAIImpl(inputDBConnection);
     }
 
+    public static String o1_preview = "o1-preview";
+    public static String o1_mini = "o1-mini";
     public static String gpt_4o_mini = "gpt-4o-mini";
     public static String gpt_4o = "gpt-4o";
     public static String gpt_4_turbo_preview = "gpt-4-turbo-preview";
@@ -51,9 +53,10 @@ public class OpenAIImpl extends AbsOpenAIImpl {
     private Map<String, String> urlMapping;
     private Map<String, Integer> contextWindowMapping;
     private Map<String, Integer> maxOutputMapping;
+    private Map<String, Boolean> supportSystemMapping;
 
     private void setup() {
-        chatModels = new String[]{gpt_4o_mini, gpt_4o, gpt_4_turbo_preview, gpt_35_turbo};
+        chatModels = new String[]{o1_preview, o1_mini, gpt_4o_mini, gpt_4o, gpt_4_turbo_preview, gpt_35_turbo};
         embeddingModels = new String[]{text_embedding_3_large, text_embedding_3_small};
         imageModels = new String[]{dall_e_3, dall_e_2};
         visionModels = new String[]{gpt_4o_mini, gpt_4o, gpt_4_vision_preview};
@@ -61,6 +64,8 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         speechToTextModels = new String[]{whisper_1};
 
         urlMapping = new HashMap<String, String>();
+        urlMapping.put(o1_preview, "https://api.openai.com/v1/chat/completions");
+        urlMapping.put(o1_mini, "https://api.openai.com/v1/chat/completions");
         urlMapping.put(gpt_4o_mini, "https://api.openai.com/v1/chat/completions");
         urlMapping.put(gpt_4o, "https://api.openai.com/v1/chat/completions");
         urlMapping.put(gpt_4_turbo_preview, "https://api.openai.com/v1/chat/completions");
@@ -75,6 +80,8 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         urlMapping.put(whisper_1, "https://api.openai.com/v1/audio/transcriptions");
 
         contextWindowMapping = new HashMap<String, Integer>();
+        contextWindowMapping.put(o1_preview, 128000);
+        contextWindowMapping.put(o1_mini, 128000);
         contextWindowMapping.put(gpt_4o_mini, 128000);
         contextWindowMapping.put(gpt_4o, 128000);
         contextWindowMapping.put(gpt_4_turbo_preview, 128000);
@@ -82,11 +89,22 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         contextWindowMapping.put(gpt_4_vision_preview, 128000);
 
         maxOutputMapping = new HashMap<String, Integer>();
-        maxOutputMapping.put(gpt_4o_mini, 4096);
-        maxOutputMapping.put(gpt_4o, 4096);
+        maxOutputMapping.put(o1_preview, 65536);
+        maxOutputMapping.put(o1_mini, 32768);
+        maxOutputMapping.put(gpt_4o_mini, 16384);
+        maxOutputMapping.put(gpt_4o, 16384);
         maxOutputMapping.put(gpt_4_turbo_preview, 4096);
         maxOutputMapping.put(gpt_35_turbo, 4096);
         maxOutputMapping.put(gpt_4_vision_preview, 4096);
+
+        supportSystemMapping = new HashMap<String, Boolean>();
+        supportSystemMapping.put(o1_preview, false);
+        supportSystemMapping.put(o1_mini, false);
+        supportSystemMapping.put(gpt_4o_mini, true);
+        supportSystemMapping.put(gpt_4o, true);
+        supportSystemMapping.put(gpt_4_turbo_preview, true);
+        supportSystemMapping.put(gpt_35_turbo, true);
+        supportSystemMapping.put(gpt_4_vision_preview, true);
     }
 
     @Override
@@ -170,5 +188,15 @@ public class OpenAIImpl extends AbsOpenAIImpl {
     @Override
     protected String getDefaultSystemHint() {
         return "You are a helpful assistant. You always response result in plain text.";
+    }
+
+    @Override
+    protected boolean isSupportSystemHint(String model) {
+        if(supportSystemMapping.containsKey(model)) {
+            return supportSystemMapping.get(model);
+        }
+        else {
+            throw new NeoAIException("model " + model + " not supported to get is support System!");
+        }
     }
 }
