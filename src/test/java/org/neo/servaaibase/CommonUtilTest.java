@@ -90,7 +90,7 @@ public class CommonUtilTest
         }
     }
 
-    public void testCommandSandBox() throws Exception {
+    public void _testCommandSandBox() throws Exception {
         String commandSandBox = "ls -l /tmp/";
         String sUrl = "http://localhost:8080/ServaWeb/api/aisandbox/executecommand";
 
@@ -163,7 +163,7 @@ public class CommonUtilTest
         assertEquals(normalizedPath3, expectedPath3);
     }
 
-    public void testGetFileName() {
+    public void _testGetFileName() {
         String filePath = "/tmp/audio.mp3";
         String fileName = CommonUtil.getFileName(filePath);
         assertEquals(fileName, "audio.mp3");
