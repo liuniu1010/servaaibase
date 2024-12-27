@@ -1,7 +1,7 @@
 package org.neo.servaaibase.impl;
 
 import java.util.Map;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.neo.servaframe.interfaces.DBConnectionIFC;
 import org.neo.servaaibase.model.AIModel;
@@ -51,12 +51,12 @@ public class GoogleAIImpl extends AbsGoogleAIImpl {
         textToSpeechModels = new String[] {};
         speechToTextModels = new String[] {}; 
 
-        maxOutputMapping = new HashMap<String, Integer>();
+        maxOutputMapping = new ConcurrentHashMap<String, Integer>();
         maxOutputMapping.put(gemini_1_5_pro_latest, 8192);
         maxOutputMapping.put(gemini_1_0_pro, 2048);
         maxOutputMapping.put(gemini_pro_vision, 4096);
 
-        maxInputMapping = new HashMap<String, Integer>();
+        maxInputMapping = new ConcurrentHashMap<String, Integer>();
         maxInputMapping.put(gemini_1_5_pro_latest, 1048576);
         maxInputMapping.put(gemini_1_0_pro, 30720);
         maxInputMapping.put(gemini_pro_vision, 12288);

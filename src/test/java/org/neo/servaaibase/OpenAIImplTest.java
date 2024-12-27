@@ -262,7 +262,7 @@ class VisionImageTask implements DBQueryTaskIFC {
 
             List<AIModel.Attachment> attachments = new ArrayList<AIModel.Attachment>();
             attachments.add(attachment1);
-            attachments.add(attachment2);
+      //      attachments.add(attachment2);
 
             AIModel.AttachmentGroup attachmentGroup = new AIModel.AttachmentGroup();
             attachmentGroup.setAttachments(attachments);

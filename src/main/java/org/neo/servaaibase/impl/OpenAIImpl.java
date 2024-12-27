@@ -1,7 +1,7 @@
 package org.neo.servaaibase.impl;
 
 import java.util.Map;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.neo.servaframe.interfaces.DBConnectionIFC;
 import org.neo.servaaibase.model.AIModel;
@@ -61,11 +61,11 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         chatModels = new String[]{o1_preview, o1_mini, gpt_4o_mini, gpt_4o, gpt_4_turbo_preview, gpt_35_turbo};
         embeddingModels = new String[]{text_embedding_3_large, text_embedding_3_small};
         imageModels = new String[]{dall_e_3, dall_e_2};
-        visionModels = new String[]{gpt_4o_mini, gpt_4o, gpt_4_vision_preview};
+        visionModels = new String[]{gpt_4o_mini, gpt_4o, /*gpt_4_vision_preview*/};
         textToSpeechModels = new String[]{tts_1, tts_1_hd};
         speechToTextModels = new String[]{whisper_1};
 
-        urlMapping = new HashMap<String, String>();
+        urlMapping = new ConcurrentHashMap<String, String>();
         urlMapping.put(o1, "https://api.openai.com/v1/chat/completions");
         urlMapping.put(o1_preview, "https://api.openai.com/v1/chat/completions");
         urlMapping.put(o1_mini, "https://api.openai.com/v1/chat/completions");
@@ -82,7 +82,7 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         urlMapping.put(tts_1_hd, "https://api.openai.com/v1/audio/speech");
         urlMapping.put(whisper_1, "https://api.openai.com/v1/audio/transcriptions");
 
-        contextWindowMapping = new HashMap<String, Integer>();
+        contextWindowMapping = new ConcurrentHashMap<String, Integer>();
         contextWindowMapping.put(o1, 200000);
         contextWindowMapping.put(o1_preview, 128000);
         contextWindowMapping.put(o1_mini, 128000);
@@ -92,7 +92,7 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         contextWindowMapping.put(gpt_35_turbo, 16385);
         contextWindowMapping.put(gpt_4_vision_preview, 128000);
 
-        maxOutputMapping = new HashMap<String, Integer>();
+        maxOutputMapping = new ConcurrentHashMap<String, Integer>();
         maxOutputMapping.put(o1, 100000);
         maxOutputMapping.put(o1_preview, 32768);
         maxOutputMapping.put(o1_mini, 65536);
@@ -102,7 +102,7 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         maxOutputMapping.put(gpt_35_turbo, 4096);
         maxOutputMapping.put(gpt_4_vision_preview, 4096);
 
-        supportSystemMapping = new HashMap<String, Boolean>();
+        supportSystemMapping = new ConcurrentHashMap<String, Boolean>();
         supportSystemMapping.put(o1, false);
         supportSystemMapping.put(o1_preview, false);
         supportSystemMapping.put(o1_mini, false);

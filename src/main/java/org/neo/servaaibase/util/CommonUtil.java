@@ -1,7 +1,7 @@
 package org.neo.servaaibase.util;
 
 import java.util.Map;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
 import java.util.Calendar;
 import java.util.Date;
@@ -381,7 +381,7 @@ public class CommonUtil {
         return fileName; 
     }
 
-    private static final Map<String, String> mimeTypeToExtensionMap = new HashMap<>();
+    private static final Map<String, String> mimeTypeToExtensionMap = new ConcurrentHashMap<>();
     static {
         mimeTypeToExtensionMap.put("text/plain", ".txt");
         mimeTypeToExtensionMap.put("text/html", ".html");

@@ -1,7 +1,7 @@
 package org.neo.servaaibase;
 
 import java.util.Map;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class NeoAIException extends RuntimeException {
     public static int NEOAIEXCEPTION_OTHER = 0;
@@ -21,7 +21,7 @@ public class NeoAIException extends RuntimeException {
     public static int NEOAIEXCEPTION_MAXONLINENUMBER_EXCEED = 14;
     public static int NEOAIEXCEPTION_ADMIN_NOTIN_WHITELIST = 15;
    
-    private static Map<Integer, String> defaultMapping = new HashMap<Integer, String>();
+    private static Map<Integer, String> defaultMapping = new ConcurrentHashMap<Integer, String>();
     static {
         defaultMapping.put(NEOAIEXCEPTION_OTHER, "Other reason");
         defaultMapping.put(NEOAIEXCEPTION_JSONSYNTAXERROR, "Json syntax error");
