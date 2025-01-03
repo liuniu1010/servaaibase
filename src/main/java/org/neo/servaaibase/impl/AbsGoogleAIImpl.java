@@ -32,6 +32,7 @@ abstract public class AbsGoogleAIImpl implements SuperAIIFC {
     abstract protected String getUrl(String model, String action);
     abstract protected int getMaxOutputTokenNumber(String model);
     abstract protected int getMaxInputTokenNumber(String model);
+    abstract protected String getDefaultSystemHint();
 
     @Override
     public AIModel.ChatResponse fetchChatResponse(String model, AIModel.PromptStruct promptStruct) {
@@ -259,6 +260,19 @@ abstract public class AbsGoogleAIImpl implements SuperAIIFC {
         return chatResponse;
     }
 
+    private JsonObject generateJsonObjectFromSystemHint(String systemHint) {
+        JsonArray jsonParts = new JsonArray();
+        JsonObject jsonText = new JsonObject();
+        jsonText.addProperty("text", systemHint);
+        jsonParts.add(jsonText);
+
+        JsonObject recordContent = new JsonObject();
+        recordContent.addProperty("role", "user");
+        recordContent.add("parts", jsonParts);
+
+        return recordContent;
+    }
+
     private JsonObject generateJsonObjectFromChatRecord(AIModel.ChatRecord chatRecord) {
         JsonArray jsonParts = new JsonArray();
         JsonObject jsonText = new JsonObject();
@@ -308,21 +322,21 @@ abstract public class AbsGoogleAIImpl implements SuperAIIFC {
         JsonArray jsonContents = new JsonArray();
 
         JsonArray jsonUserParts = new JsonArray();
-
+        String systemHint = getDefaultSystemHint();
+        if(promptStruct.getSystemHint() != null
+            && !promptStruct.getSystemHint().isEmpty()) {
+            systemHint = promptStruct.getSystemHint();  // caller has set system hint, use it
+        }
+ 
         if(!isVisionModel(model)) {
+            // for google api request, the first and last end text should be role user
+            // add systemHint as the first end text
+            jsonContents.add(generateJsonObjectFromSystemHint(systemHint));
+
             // conversation history parts
             List<AIModel.ChatRecord> chatRecords = promptStruct.getChatRecords();
-            boolean beginWithUserRole = false;
             for(AIModel.ChatRecord chatRecord: chatRecords) {
-                // for google api request, the first and last end text should be role user
-                // so the first end text with role model should be filtered out
-                if(chatRecord.getIsRequest()) {
-                    beginWithUserRole = true;
-                }
-            
-                if(beginWithUserRole) {
-                    jsonContents.add(generateJsonObjectFromChatRecord(chatRecord));
-                }
+                jsonContents.add(generateJsonObjectFromChatRecord(chatRecord));
             }
         }
         else { // current google vision model doesn't support multi turn
@@ -351,9 +365,11 @@ abstract public class AbsGoogleAIImpl implements SuperAIIFC {
         // text of part
         JsonObject jsonUserPartOnText = new JsonObject();
         String adjustedInput = promptStruct.getUserInput();
-        if(promptStruct.getSystemHint() != null
-            && !promptStruct.getSystemHint().isEmpty()) {
-            adjustedInput = promptStruct.getSystemHint() + "\n" + promptStruct.getUserInput(); 
+        
+        if(isVisionModel(model)) {
+            // vision model doesn't support multi turn, so the systemHint was not be added 
+            // as the first end text, then adjust the input here
+            adjustedInput = systemHint + "\n" + promptStruct.getUserInput(); 
         }
         jsonUserPartOnText.addProperty("text", adjustedInput);
         jsonUserParts.add(jsonUserPartOnText);

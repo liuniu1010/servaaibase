@@ -136,4 +136,9 @@ public class GoogleAIImpl extends AbsGoogleAIImpl {
             throw new NeoAIException("model " + model + " not supported to get max input tokens!");
         }
     }
+
+    @Override
+    protected String getDefaultSystemHint() {
+        return "You are a helpful assistant. You always response result in plain text.";
+    }
 }
