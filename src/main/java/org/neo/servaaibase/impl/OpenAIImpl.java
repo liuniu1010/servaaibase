@@ -62,7 +62,7 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         embeddingModels = new String[]{text_embedding_3_large, text_embedding_3_small};
         imageModels = new String[]{dall_e_3, dall_e_2};
         visionModels = new String[]{gpt_4o_mini, gpt_4o, /*gpt_4_vision_preview*/};
-        textToSpeechModels = new String[]{tts_1, tts_1_hd};
+        textToSpeechModels = new String[]{tts_1_hd, tts_1};
         speechToTextModels = new String[]{whisper_1};
 
         urlMapping = new ConcurrentHashMap<String, String>();

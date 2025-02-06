@@ -570,5 +570,20 @@ public class CommonUtil {
         }
         return null;
     }
+
+    public static List<String> splitIntoSentences(String text) {
+        List<String> sentences = new ArrayList<>();
+        
+        // Regular expression to match sentences
+        String sentenceRegex = "[A-Z][^.!?]*[.!?]";
+        Pattern pattern = Pattern.compile(sentenceRegex, Pattern.MULTILINE);
+        Matcher matcher = pattern.matcher(text);
+        
+        while (matcher.find()) {
+            sentences.add(matcher.group().trim());
+        }
+        
+        return sentences;
+    }
 }
 

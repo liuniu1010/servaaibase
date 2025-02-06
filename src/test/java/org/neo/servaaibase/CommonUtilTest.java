@@ -239,5 +239,14 @@ public class CommonUtilTest
             }
         }
     }
+
+    public void testSplitIntoSentences() {
+        String text = "Hello world! This is a test. How are you? Let's split this into sentences.";
+        List<String> sentences = CommonUtil.splitIntoSentences(text);
+        
+        for (String sentence : sentences) {
+            System.out.println(sentence);
+        }
+    }
 }
 
