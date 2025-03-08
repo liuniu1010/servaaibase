@@ -28,6 +28,7 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         return new OpenAIImpl(inputDBConnection);
     }
 
+    public static String o3_mini = "o3-mini";
     public static String o1 = "o1";
     public static String o1_preview = "o1-preview";
     public static String o1_mini = "o1-mini";
@@ -56,7 +57,7 @@ public class OpenAIImpl extends AbsOpenAIImpl {
     private Map<String, Boolean> supportSystemMapping;
 
     private void setup() {
-        chatModels = new String[]{o1, o1_preview, o1_mini, gpt_4o_mini, gpt_4o, gpt_4_turbo_preview, gpt_35_turbo};
+        chatModels = new String[]{o3_mini, o1, o1_preview, o1_mini, gpt_4o_mini, gpt_4o, gpt_4_turbo_preview, gpt_35_turbo};
         embeddingModels = new String[]{text_embedding_3_large, text_embedding_3_small};
         imageModels = new String[]{dall_e_3, dall_e_2};
         visionModels = new String[]{o1, gpt_4o_mini, gpt_4o};
@@ -64,6 +65,7 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         speechToTextModels = new String[]{whisper_1};
 
         urlMapping = new ConcurrentHashMap<String, String>();
+        urlMapping.put(o3_mini, "https://api.openai.com/v1/chat/completions");
         urlMapping.put(o1, "https://api.openai.com/v1/chat/completions");
         urlMapping.put(o1_preview, "https://api.openai.com/v1/chat/completions");
         urlMapping.put(o1_mini, "https://api.openai.com/v1/chat/completions");
@@ -80,6 +82,7 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         urlMapping.put(whisper_1, "https://api.openai.com/v1/audio/transcriptions");
 
         contextWindowMapping = new ConcurrentHashMap<String, Integer>();
+        contextWindowMapping.put(o3_mini, 200000);
         contextWindowMapping.put(o1, 200000);
         contextWindowMapping.put(o1_preview, 128000);
         contextWindowMapping.put(o1_mini, 128000);
@@ -89,6 +92,7 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         contextWindowMapping.put(gpt_35_turbo, 16385);
 
         maxOutputMapping = new ConcurrentHashMap<String, Integer>();
+        maxOutputMapping.put(o3_mini, 100000);
         maxOutputMapping.put(o1, 100000);
         maxOutputMapping.put(o1_preview, 32768);
         maxOutputMapping.put(o1_mini, 65536);
@@ -98,7 +102,8 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         maxOutputMapping.put(gpt_35_turbo, 4096);
 
         supportSystemMapping = new ConcurrentHashMap<String, Boolean>();
-        supportSystemMapping.put(o1, false);
+        supportSystemMapping.put(o3_mini, true);
+        supportSystemMapping.put(o1, true);
         supportSystemMapping.put(o1_preview, false);
         supportSystemMapping.put(o1_mini, false);
         supportSystemMapping.put(gpt_4o_mini, true);
