@@ -181,9 +181,11 @@ public class OpenAIImplTest
         }
     }
 
-    public void _testSpeechToText() throws Exception {
+    public void testSpeechToText() throws Exception {
         try {
-            String filePath = "/tmp/Zf7oNt4Vdz.mp3";
+            String fileName = "001.mp3";
+            String filePath = "/tmp/001.mp3";
+            IOUtil.resourceFileToFile(fileName, filePath);
             speechToText(filePath);
         }
         catch(Exception ex) {
@@ -252,8 +254,7 @@ class VisionImageTask implements DBQueryTaskIFC {
             promptStruct.setUserInput(userInput);
 
             AIModel.Attachment attachment1 = new AIModel.Attachment();
-            InputStream in = new FileInputStream("/tmp/dogandcat.png");
-            String rawBase64 = IOUtil.inputStreamToRawBase64(in);
+            String rawBase64 = IOUtil.resourceFileToRawBase64("dogandcat.png");
             String base64 = "data:image/png;base64," + rawBase64;
             attachment1.setContent(base64);
 
