@@ -112,6 +112,15 @@ public class CommonUtil {
         rendered += "\n<meta charset=\"UTF-8\">";
         rendered += "\n<title></title>";
         rendered += "\n<style>";
+        rendered += "\n.hidden-text {";
+        rendered += "\nvisibility: hidden;";
+        rendered += "\nopacity: 0;";
+        rendered += "\ntransition: opacity 0.3s;";
+        rendered += "\n}";
+        rendered += "\n.hover-container:hover .hidden-text {";
+        rendered += "\nvisibility: visible;";
+        rendered += "\nopacity: 1;";
+        rendered += "\n}";
         rendered += "\n.chat-container {";
         rendered += "\ndisplay: flex;";
         rendered += "\nflex-direction: column;";
