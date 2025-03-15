@@ -120,7 +120,7 @@ public class CommonUtil {
         rendered += "\n}";
 
         rendered += "\n.chat-bubble {";
-        rendered += "\nbackground-color: #e0e0e0;";
+        rendered += "\nbackground-color: #300A24;";
         rendered += "\nborder-radius: 5px;";
         rendered += "\npadding-top: 10px;";
         rendered += "\npadding-bottom: 10px;";
@@ -135,8 +135,8 @@ public class CommonUtil {
         rendered += "\n}";
 
         rendered += "\n.chat-bubble.request-title {";
-        rendered += "\nbackground-color: #ffffff;";
-        rendered += "\ncolor: #000000;";
+        rendered += "\nbackground-color: #300A24;";
+        rendered += "\ncolor: #ffffff;";
         rendered += "\nalign-self: flex-end;";
         rendered += "\n}";
 
@@ -147,8 +147,8 @@ public class CommonUtil {
         rendered += "\n}";
 
         rendered += "\n.chat-bubble.response-title {";
-        rendered += "\nbackground-color: #ffffff;";
-        rendered += "\ncolor: #000000;";
+        rendered += "\nbackground-color: #300A24;";
+        rendered += "\ncolor: #ffffff;";
         rendered += "\nalign-self: flex-start;";
         rendered += "\n}";
 
