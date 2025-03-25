@@ -166,4 +166,19 @@ public class StorageInDBImpl implements StorageIFC {
         SQLStruct sqlStruct = new SQLStruct(sql, params);
         dbConnection.execute(sqlStruct);
     }
+
+    @Override
+    public AIModel.CodeFeedback getCodeFeedback(Object key) {
+        throw new NeoAIException("not support");
+    }
+
+    @Override
+    public void putCodeFeedback(Object key, AIModel.CodeFeedback codeFeedback) {
+        throw new NeoAIException("not support");
+    }
+
+    @Override
+    public void removeCodeFeedback(Object key) {
+        throw new NeoAIException("not support");
+    }
 }

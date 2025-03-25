@@ -485,4 +485,34 @@ public class AIModel {
             return attachment;
         }
     }
+
+    public static class CodeFeedback {
+        private String requirement;
+        private String codeContent;
+        private String feedback;
+
+        public String getRequirement() {
+            return requirement;
+        }
+
+        public void setRequirement(String inputRequirement) {
+            requirement = inputRequirement;
+        }
+
+        public String getCodeContent() {
+            return codeContent;
+        }
+
+        public void setCodeContent(String inputCodeContent) {
+            codeContent = inputCodeContent;
+        }
+
+        public String getFeedback() {
+            return feedback;
+        }
+
+        public void setFeedback(String inputFeedback) {
+            feedback = inputFeedback;
+        }
+    }
 }

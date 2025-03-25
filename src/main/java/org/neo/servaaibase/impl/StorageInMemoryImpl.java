@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.neo.servaframe.model.NeoConcurrentHashMap;
 import org.neo.servaaibase.ifc.StorageIFC;
 import org.neo.servaaibase.model.AIModel;
 
@@ -90,5 +91,21 @@ public class StorageInMemoryImpl implements StorageIFC {
     @Override
     public void clearCodeRecords(Object key) {
         getBucket(key).clearCodeRecords();
+    }
+
+    private Map<Object, AIModel.CodeFeedback> codeFeedbackCache = new NeoConcurrentHashMap<Object, AIModel.CodeFeedback>();
+    @Override
+    public AIModel.CodeFeedback getCodeFeedback(Object key) {
+        return codeFeedbackCache.get(key);
+    }
+
+    @Override
+    public void putCodeFeedback(Object key, AIModel.CodeFeedback codeFeedback) {
+        codeFeedbackCache.put(key, codeFeedback);
+    }
+
+    @Override
+    public void removeCodeFeedback(Object key) {
+        codeFeedbackCache.remove(key);
     }
 }
