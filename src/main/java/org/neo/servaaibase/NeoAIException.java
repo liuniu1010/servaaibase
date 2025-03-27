@@ -21,6 +21,7 @@ public class NeoAIException extends RuntimeException {
     public static int NEOAIEXCEPTION_MAXONLINENUMBER_EXCEED = 14;
     public static int NEOAIEXCEPTION_ADMIN_NOTIN_WHITELIST = 15;
     public static int NEOAIEXCEPTION_FILESIZE_EXCEED_UPPERLIMIT = 16;
+    public static int NEOAIEXCEPTION_LLM_TOO_BUSY = 17;
    
     private static Map<Integer, String> defaultMapping = new ConcurrentHashMap<Integer, String>();
     static {
@@ -41,6 +42,7 @@ public class NeoAIException extends RuntimeException {
         defaultMapping.put(NEOAIEXCEPTION_MAXONLINENUMBER_EXCEED, "Exceed max online number, please wait some moments and login again");
         defaultMapping.put(NEOAIEXCEPTION_ADMIN_NOTIN_WHITELIST, "This account is not administrator");
         defaultMapping.put(NEOAIEXCEPTION_FILESIZE_EXCEED_UPPERLIMIT, "File size exceed upper limit");
+        defaultMapping.put(NEOAIEXCEPTION_LLM_TOO_BUSY, "Background LLM too busy");
     }
 
     private int code;

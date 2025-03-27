@@ -47,7 +47,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
     @Override
     public AIModel.ChatResponse fetchChatResponse(String model, AIModel.PromptStruct promptStruct) {
         try {
-            return innerFetchChatResponse(model, promptStruct);
+            return elasticFetchChatResponse(model, promptStruct);
         }
         catch(NeoAIException nex) {
             logger.error(nex.getMessage(), nex);
@@ -62,7 +62,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
     @Override
     public AIModel.Embedding getEmbedding(String model, String input) {
         try {
-            return innerGetEmbedding(model, input, -1);
+            return elasticGetEmbedding(model, input, -1);
         }
         catch(NeoAIException nex) {
             logger.error(nex.getMessage(), nex);
@@ -77,7 +77,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
     @Override
     public AIModel.Embedding getEmbedding(String model, String input, int dimensions) {
         try {
-            return innerGetEmbedding(model, input, dimensions);
+            return elasticGetEmbedding(model, input, dimensions);
         }
         catch(NeoAIException nex) {
             logger.error(nex.getMessage(), nex);
@@ -92,7 +92,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
     @Override
     public String[] generateImages(String model, AIModel.ImagePrompt imagePrompt) {
         try {
-            return innerGenerateImage(model, imagePrompt);
+            return elasticGenerateImage(model, imagePrompt);
         }
         catch(NeoAIException nex) {
             logger.error(nex.getMessage(), nex);
@@ -107,7 +107,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
     @Override
     public String generateSpeech(String model, AIModel.TextToSpeechPrompt textToSpeechPrompt, String onlineFileAbsolutePath) {
         try {
-            return innerGenerateSpeech(model, textToSpeechPrompt, onlineFileAbsolutePath);
+            return elasticGenerateSpeech(model, textToSpeechPrompt, onlineFileAbsolutePath);
         }
         catch(NeoAIException nex) {
             logger.error(nex.getMessage(), nex);
@@ -122,7 +122,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
     @Override
     public AIModel.ChatResponse speechToText(String model, AIModel.Attachment attachment) {
         try {
-            return innerSpeechToText(model, attachment);
+            return elasticSpeechToText(model, attachment);
         }
         catch(NeoAIException nex) {
             logger.error(nex.getMessage(), nex);
@@ -134,10 +134,70 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         }
     }
 
+    private AIModel.ChatResponse elasticFetchChatResponse(String model, AIModel.PromptStruct promptStruct) throws Exception {
+        int retryTimesOnLLMException = CommonUtil.getConfigValueAsInt("retryTimesOnLLMException");
+        int waitSeconds = CommonUtil.getConfigValueAsInt("firstWaitSecondsOnLLMException");
+        for(int i = 0;i < retryTimesOnLLMException;i++) {
+            try {
+                return innerFetchChatResponse(model, promptStruct);
+            }
+            catch(NeoAIException nex) {
+                logger.error(nex.getMessage(), nex);
+                if(nex.getCode() == NeoAIException.NEOAIEXCEPTION_IOEXCEPTIONWITHLLM
+                    || nex.getCode() == NeoAIException.NEOAIEXCEPTION_JSONSYNTAXERROR ) {
+                    // met ioexception or syntax exception with LLM, wait some seconds and try again
+                    try {
+                        logger.info("Meet IOException or syntax exception from LLM, wait " + waitSeconds + " seconds and try again...");
+                        Thread.sleep(1000 * waitSeconds);
+                        waitSeconds = waitSeconds * 2;
+                    }
+                    catch(InterruptedException e) {
+                        logger.error(e.getMessage(), e);
+                    }
+                    continue;
+                }
+                else {
+                    throw nex;
+                }
+            }
+        }
+        throw new NeoAIException(NeoAIException.NEOAIEXCEPTION_LLM_TOO_BUSY);
+    }
+
     private AIModel.ChatResponse innerFetchChatResponse(String model, AIModel.PromptStruct promptStruct) throws Exception {
         int maxTokens = determineMaxTokens(model, promptStruct);
         AIModel.ChatResponse chatResponse = innerFetchChatResponse(model, promptStruct, maxTokens);
         return chatResponse;
+    }
+
+    private String[] elasticGenerateImage(String model, AIModel.ImagePrompt imagePrompt) throws Exception {
+        int retryTimesOnLLMException = CommonUtil.getConfigValueAsInt("retryTimesOnLLMException");
+        int waitSeconds = CommonUtil.getConfigValueAsInt("firstWaitSecondsOnLLMException");
+        for(int i = 0;i < retryTimesOnLLMException;i++) {
+            try {
+                return innerGenerateImage(model, imagePrompt);
+            }
+            catch(NeoAIException nex) {
+                logger.error(nex.getMessage(), nex);
+                if(nex.getCode() == NeoAIException.NEOAIEXCEPTION_IOEXCEPTIONWITHLLM
+                    || nex.getCode() == NeoAIException.NEOAIEXCEPTION_JSONSYNTAXERROR ) {
+                    // met ioexception or syntax exception with LLM, wait some seconds and try again
+                    try {
+                        logger.info("Meet IOException or syntax exception from LLM, wait " + waitSeconds + " seconds and try again...");
+                        Thread.sleep(1000 * waitSeconds);
+                        waitSeconds = waitSeconds * 2;
+                    }
+                    catch(InterruptedException e) {
+                        logger.error(e.getMessage(), e);
+                    }
+                    continue;
+                }
+                else {
+                    throw nex;
+                }
+            }
+        }
+        throw new NeoAIException(NeoAIException.NEOAIEXCEPTION_LLM_TOO_BUSY);
     }
 
     private String[] innerGenerateImage(String model, AIModel.ImagePrompt imagePrompt) throws Exception {
@@ -145,6 +205,36 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         String jsonResponse = send(model, jsonInput);
         String[] urls = extractImageUrlsFromJson(jsonResponse);
         return urls;
+    }
+
+    private String elasticGenerateSpeech(String model, AIModel.TextToSpeechPrompt textToSpeechPrompt, String onlineFileAbsolutePath) throws Exception {
+        int retryTimesOnLLMException = CommonUtil.getConfigValueAsInt("retryTimesOnLLMException");
+        int waitSeconds = CommonUtil.getConfigValueAsInt("firstWaitSecondsOnLLMException");
+        for(int i = 0;i < retryTimesOnLLMException;i++) {
+            try {
+                return innerGenerateSpeech(model, textToSpeechPrompt, onlineFileAbsolutePath);
+            }
+            catch(NeoAIException nex) {
+                logger.error(nex.getMessage(), nex);
+                if(nex.getCode() == NeoAIException.NEOAIEXCEPTION_IOEXCEPTIONWITHLLM
+                    || nex.getCode() == NeoAIException.NEOAIEXCEPTION_JSONSYNTAXERROR ) {
+                    // met ioexception or syntax exception with LLM, wait some seconds and try again
+                    try {
+                        logger.info("Meet IOException or syntax exception from LLM, wait " + waitSeconds + " seconds and try again...");
+                        Thread.sleep(1000 * waitSeconds);
+                        waitSeconds = waitSeconds * 2;
+                    }
+                    catch(InterruptedException e) {
+                        logger.error(e.getMessage(), e);
+                    }
+                    continue;
+                }
+                else {
+                    throw nex;
+                }
+            }
+        }
+        throw new NeoAIException(NeoAIException.NEOAIEXCEPTION_LLM_TOO_BUSY);
     }
 
     private String innerGenerateSpeech(String model, AIModel.TextToSpeechPrompt textToSpeechPrompt, String onlineFileAbsolutePath) throws Exception {
@@ -155,11 +245,71 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         return fileName;
     }
 
+    private AIModel.ChatResponse elasticSpeechToText(String model, AIModel.Attachment attachment) throws Exception {
+        int retryTimesOnLLMException = CommonUtil.getConfigValueAsInt("retryTimesOnLLMException");
+        int waitSeconds = CommonUtil.getConfigValueAsInt("firstWaitSecondsOnLLMException");
+        for(int i = 0;i < retryTimesOnLLMException;i++) {
+            try {
+                return innerSpeechToText(model, attachment);
+            }
+            catch(NeoAIException nex) {
+                logger.error(nex.getMessage(), nex);
+                if(nex.getCode() == NeoAIException.NEOAIEXCEPTION_IOEXCEPTIONWITHLLM
+                    || nex.getCode() == NeoAIException.NEOAIEXCEPTION_JSONSYNTAXERROR ) {
+                    // met ioexception or syntax exception with LLM, wait some seconds and try again
+                    try {
+                        logger.info("Meet IOException or syntax exception from LLM, wait " + waitSeconds + " seconds and try again...");
+                        Thread.sleep(1000 * waitSeconds);
+                        waitSeconds = waitSeconds * 2;
+                    }
+                    catch(InterruptedException e) {
+                        logger.error(e.getMessage(), e);
+                    }
+                    continue;
+                }
+                else {
+                    throw nex;
+                }
+            }
+        }
+        throw new NeoAIException(NeoAIException.NEOAIEXCEPTION_LLM_TOO_BUSY);
+    }
+
     private AIModel.ChatResponse innerSpeechToText(String model, AIModel.Attachment attachment) throws Exception {
         String filePath = attachment.getContent();
         String jsonResponse = sendWithFormData(model, filePath);
         AIModel.ChatResponse chatResponse = extractTextFromSpeechJson(jsonResponse);
         return chatResponse;
+    }
+
+    private AIModel.Embedding elasticGetEmbedding(String model, String input, int dimensions) throws Exception {
+        int retryTimesOnLLMException = CommonUtil.getConfigValueAsInt("retryTimesOnLLMException");
+        int waitSeconds = CommonUtil.getConfigValueAsInt("firstWaitSecondsOnLLMException");
+        for(int i = 0;i < retryTimesOnLLMException;i++) {
+            try {
+                return innerGetEmbedding(model, input, dimensions);
+            }
+            catch(NeoAIException nex) {
+                logger.error(nex.getMessage(), nex);
+                if(nex.getCode() == NeoAIException.NEOAIEXCEPTION_IOEXCEPTIONWITHLLM
+                    || nex.getCode() == NeoAIException.NEOAIEXCEPTION_JSONSYNTAXERROR ) {
+                    // met ioexception or syntax exception with LLM, wait some seconds and try again
+                    try {
+                        logger.info("Meet IOException or syntax exception from LLM, wait " + waitSeconds + " seconds and try again...");
+                        Thread.sleep(1000 * waitSeconds);
+                        waitSeconds = waitSeconds * 2;
+                    }
+                    catch(InterruptedException e) {
+                        logger.error(e.getMessage(), e);
+                    }
+                    continue;
+                }
+                else {
+                    throw nex;
+                }
+            }
+        }
+        throw new NeoAIException(NeoAIException.NEOAIEXCEPTION_LLM_TOO_BUSY);
     }
 
     private AIModel.Embedding innerGetEmbedding(String model, String input, int dimensions) throws Exception {
