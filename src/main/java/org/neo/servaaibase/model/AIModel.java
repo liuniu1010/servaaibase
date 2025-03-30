@@ -487,9 +487,25 @@ public class AIModel {
     }
 
     public static class CodeFeedback {
+        private String session;
         private String requirement;
         private String codeContent;
         private String feedback;
+
+        private CodeFeedback() {
+        }
+
+        public CodeFeedback(String inputSession) {
+            session = inputSession;
+        }
+
+        public String getSession() {
+            return session;
+        }
+
+        public void setSession(String inputSession) {
+            session = inputSession;
+        }
 
         public String getRequirement() {
             return requirement;
