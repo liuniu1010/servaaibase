@@ -168,17 +168,22 @@ public class StorageInDBImpl implements StorageIFC {
     }
 
     @Override
-    public AIModel.CodeFeedback getCodeFeedback(Object key) {
+    public AIModel.CodeFeedback peekCodeFeedback(Object key) {
         throw new NeoAIException("not support");
     }
 
     @Override
-    public void putCodeFeedback(Object key, AIModel.CodeFeedback codeFeedback) {
+    public void pushCodeFeedback(Object key, AIModel.CodeFeedback codeFeedback) {
         throw new NeoAIException("not support");
     }
 
     @Override
-    public void removeCodeFeedback(Object key) {
+    public AIModel.CodeFeedback popCodeFeedback(Object key) {
+        throw new NeoAIException("not support");
+    }
+
+    @Override
+    public void clearCodeFeedbacks(Object key) {
         throw new NeoAIException("not support");
     }
 }

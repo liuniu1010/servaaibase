@@ -3,6 +3,7 @@ package org.neo.servaaibase.impl;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
+import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.neo.servaframe.model.NeoConcurrentHashMap;
@@ -37,6 +38,30 @@ public class StorageInMemoryImpl implements StorageIFC {
 
         public void clearCodeRecords() {
             codeRecords.clear();
+        }
+
+        private Stack<AIModel.CodeFeedback> codeFeedbackStack = new Stack<AIModel.CodeFeedback>();
+
+        public AIModel.CodeFeedback peekCodeFeedback() {
+            if(codeFeedbackStack.isEmpty()) {
+                return null;
+            }
+            return codeFeedbackStack.peek();
+        }
+
+        public void pushCodeFeedback(AIModel.CodeFeedback codeFeedback) {
+            codeFeedbackStack.push(codeFeedback);
+        }
+
+        public AIModel.CodeFeedback popCodeFeedback() {
+            if(codeFeedbackStack.isEmpty()) {
+                return null;
+            }
+            return codeFeedbackStack.pop();
+        }
+
+        public void clearCodeFeedbacks() {
+            codeFeedbackStack.clear();
         }
     }
 
@@ -95,17 +120,22 @@ public class StorageInMemoryImpl implements StorageIFC {
 
     private Map<Object, AIModel.CodeFeedback> codeFeedbackCache = new NeoConcurrentHashMap<Object, AIModel.CodeFeedback>();
     @Override
-    public AIModel.CodeFeedback getCodeFeedback(Object key) {
-        return codeFeedbackCache.get(key);
+    public AIModel.CodeFeedback peekCodeFeedback(Object key) {
+        return getBucket(key).peekCodeFeedback();
     }
 
     @Override
-    public void putCodeFeedback(Object key, AIModel.CodeFeedback codeFeedback) {
-        codeFeedbackCache.put(key, codeFeedback);
+    public void pushCodeFeedback(Object key, AIModel.CodeFeedback codeFeedback) {
+        getBucket(key).pushCodeFeedback(codeFeedback);
     }
 
     @Override
-    public void removeCodeFeedback(Object key) {
-        codeFeedbackCache.remove(key);
+    public AIModel.CodeFeedback popCodeFeedback(Object key) {
+        return getBucket(key).popCodeFeedback();
+    }
+
+    @Override
+    public void clearCodeFeedbacks(Object key) {
+        getBucket(key).clearCodeFeedbacks();
     }
 }

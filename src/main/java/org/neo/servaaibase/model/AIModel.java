@@ -488,15 +488,21 @@ public class AIModel {
 
     public static class CodeFeedback {
         private String session;
-        private String requirement;
         private String codeContent;
         private String feedback;
+
+        public final static int INDEX_CODECONTENT = 1;
+        public final static int INDEX_FEEDBACK = 2;
+        private int index;
 
         private CodeFeedback() {
         }
 
         public CodeFeedback(String inputSession) {
             session = inputSession;
+            codeContent = "";
+            feedback = "";
+            index = INDEX_FEEDBACK;
         }
 
         public String getSession() {
@@ -505,14 +511,6 @@ public class AIModel {
 
         public void setSession(String inputSession) {
             session = inputSession;
-        }
-
-        public String getRequirement() {
-            return requirement;
-        }
-
-        public void setRequirement(String inputRequirement) {
-            requirement = inputRequirement;
         }
 
         public String getCodeContent() {
@@ -529,6 +527,18 @@ public class AIModel {
 
         public void setFeedback(String inputFeedback) {
             feedback = inputFeedback;
+        }
+
+        public void setIndex(int inputIndex) {
+            index = inputIndex;
+        }
+
+        @Override
+        public String toString() {
+            if(index == INDEX_CODECONTENT) {
+                return codeContent;
+            }
+            return feedback;
         }
     }
 }

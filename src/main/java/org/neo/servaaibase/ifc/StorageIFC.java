@@ -12,7 +12,8 @@ public interface StorageIFC {
     public void addCodeRecord(Object key, AIModel.CodeRecord codeRecord);
     public void clearCodeRecords(Object key);
 
-    public AIModel.CodeFeedback getCodeFeedback(Object key);
-    public void putCodeFeedback(Object key, AIModel.CodeFeedback codeFeedback);
-    public void removeCodeFeedback(Object key);
+    public AIModel.CodeFeedback peekCodeFeedback(Object key);
+    public void pushCodeFeedback(Object key, AIModel.CodeFeedback codeFeedback);
+    public AIModel.CodeFeedback popCodeFeedback(Object key);
+    public void clearCodeFeedbacks(Object key);
 }
