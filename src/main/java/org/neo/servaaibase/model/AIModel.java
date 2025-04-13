@@ -242,10 +242,55 @@ public class AIModel {
         }
     }
 
+    public static class TokensUsage {
+        private int inputTokens;
+        private int outputTokens;
+        private int cachedTokens;
+
+        public TokensUsage() {
+            inputTokens = 0;
+            outputTokens = 0;
+            cachedTokens = 0;
+        }
+
+        public int getInputTokens() {
+            return inputTokens;
+        }
+
+        public void setInputTokens(int inputInputTokens) {
+            inputTokens = inputInputTokens;
+        }
+
+        public int getOutputTokens() {
+            return outputTokens;
+        }
+
+        public void setOutputTokens(int inputOutputTokens) {
+            outputTokens = inputOutputTokens;
+        }
+
+        public int getCachedTokens() {
+            return cachedTokens;
+        }
+
+        public void setCachedTokens(int inputCachedTokens) {
+            cachedTokens = inputCachedTokens;
+        }
+
+        @Override
+        public String toString() {
+            String str = "inputTokens = " + inputTokens;
+            str += "\noutputTokens = " + outputTokens;
+            str += "\ncachedTokens = " + cachedTokens;
+            return str;
+        }
+    }
+
     public static class ChatResponse {
         private boolean isSuccess;
         private String message;   // in case isSuccess is false, message is exception info
         private List<AIModel.Call> calls;
+        private TokensUsage tokensUsage;
 
         public ChatResponse(boolean inputIsSuccess, String inputMessage) {
             isSuccess = inputIsSuccess;
@@ -266,6 +311,14 @@ public class AIModel {
 
         public void setCalls(List<AIModel.Call> inputCalls) {
             calls = inputCalls;
+        }
+
+        public TokensUsage getTokensUsage() {
+            return tokensUsage;
+        }
+
+        public void setTokensUsage(TokensUsage inputTokensUsage) {
+            tokensUsage = inputTokensUsage;
         }
     }
 

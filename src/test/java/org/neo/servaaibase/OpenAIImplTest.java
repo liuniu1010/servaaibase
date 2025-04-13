@@ -222,6 +222,7 @@ class FetchChatResponseTask implements DBQueryTaskIFC {
             promptStruct.setUserInput(userInput);
             AIModel.ChatResponse chatResponse = openAI.fetchChatResponse(model, promptStruct);
             System.out.println("response = " + chatResponse.getMessage());
+            System.out.println("tokensUsage = " + chatResponse.getTokensUsage());
         }
         return null;
     }

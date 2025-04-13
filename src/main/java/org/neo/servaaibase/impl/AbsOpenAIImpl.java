@@ -338,8 +338,10 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         String jsonInput = generateJsonBodyToFetchResponse(model, promptStruct, maxTokens);
         String jsonResponse = send(model, jsonInput);
         List<AIModel.Call> calls = extractCallsFromJson(jsonResponse);
+        AIModel.TokensUsage tokensUsage = extractTokensUsageFromJson(jsonResponse);
         AIModel.ChatResponse chatResponse = extractChatResponseFromJson(jsonResponse);
         chatResponse.setCalls(calls);
+        chatResponse.setTokensUsage(tokensUsage);
         return chatResponse;
     }
 
@@ -385,6 +387,21 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         }
 
         return urls;
+    }
+
+    private AIModel.TokensUsage extractTokensUsageFromJson(String jsonResponse) throws Exception {
+        AIModel.TokensUsage tokensUsage = new AIModel.TokensUsage();
+        JsonElement element = JsonParser.parseString(jsonResponse);
+        JsonObject jsonObject = element.getAsJsonObject();
+        if(jsonObject.has("usage")) {
+            JsonObject usage = jsonObject.getAsJsonObject("usage");
+            tokensUsage.setInputTokens(usage.get("prompt_tokens").getAsInt());
+            tokensUsage.setOutputTokens(usage.get("completion_tokens").getAsInt());
+            JsonObject promptTokensDetails = usage.getAsJsonObject("prompt_tokens_details");
+            tokensUsage.setCachedTokens(promptTokensDetails.get("cached_tokens").getAsInt());
+        }
+
+        return tokensUsage;
     }
 
     private List<AIModel.Call> extractCallsFromJson(String jsonResponse) throws Exception {
