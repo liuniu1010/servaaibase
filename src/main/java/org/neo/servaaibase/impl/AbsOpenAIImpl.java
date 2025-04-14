@@ -744,6 +744,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
     }
 
     private String sendWithFormData(String model, String filePath) throws Exception {
+        logger.info("call openai api, model = " + model + ", filePath = " + filePath);
         OkHttpClient client = new OkHttpClient();
         
         String fileName = CommonUtil.getFileName(filePath);
@@ -767,6 +768,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
 
             String responseJson = response.body().string();
             responseJson = CommonUtil.alignJson(responseJson);
+            logger.info("return from openai api, response = " + responseJson);
             return responseJson;
         }
     }
