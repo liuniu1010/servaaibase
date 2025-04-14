@@ -105,9 +105,9 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
     }
 
     @Override
-    public String generateSpeech(String model, AIModel.TextToSpeechPrompt textToSpeechPrompt, String onlineFileAbsolutePath) {
+    public String textToSpeech(String model, AIModel.TextToSpeechPrompt textToSpeechPrompt, String onlineFileAbsolutePath) {
         try {
-            return elasticGenerateSpeech(model, textToSpeechPrompt, onlineFileAbsolutePath);
+            return elasticTextToSpeech(model, textToSpeechPrompt, onlineFileAbsolutePath);
         }
         catch(NeoAIException nex) {
             logger.error(nex.getMessage(), nex);
@@ -207,12 +207,12 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         return urls;
     }
 
-    private String elasticGenerateSpeech(String model, AIModel.TextToSpeechPrompt textToSpeechPrompt, String onlineFileAbsolutePath) throws Exception {
+    private String elasticTextToSpeech(String model, AIModel.TextToSpeechPrompt textToSpeechPrompt, String onlineFileAbsolutePath) throws Exception {
         int retryTimesOnLLMException = CommonUtil.getConfigValueAsInt("retryTimesOnLLMException");
         int waitSeconds = CommonUtil.getConfigValueAsInt("firstWaitSecondsOnLLMException");
         for(int i = 0;i < retryTimesOnLLMException;i++) {
             try {
-                return innerGenerateSpeech(model, textToSpeechPrompt, onlineFileAbsolutePath);
+                return innerTextToSpeech(model, textToSpeechPrompt, onlineFileAbsolutePath);
             }
             catch(NeoAIException nex) {
                 logger.error(nex.getMessage(), nex);
@@ -237,8 +237,8 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         throw new NeoAIException(NeoAIException.NEOAIEXCEPTION_LLM_TOO_BUSY);
     }
 
-    private String innerGenerateSpeech(String model, AIModel.TextToSpeechPrompt textToSpeechPrompt, String onlineFileAbsolutePath) throws Exception {
-        String jsonInput = generateJsonBodyToGenerateSpeech(model, textToSpeechPrompt);
+    private String innerTextToSpeech(String model, AIModel.TextToSpeechPrompt textToSpeechPrompt, String onlineFileAbsolutePath) throws Exception {
+        String jsonInput = generateJsonBodyToTextToSpeech(model, textToSpeechPrompt);
         String fileName = "audio_" + CommonUtil.getRandomString(10) + "." + textToSpeechPrompt.getOutputFormat();
         String filePath = CommonUtil.normalizeFolderPath(onlineFileAbsolutePath) + File.separator + fileName;
         sendAndGenerateFile(model, jsonInput, filePath);
@@ -315,7 +315,9 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
     private AIModel.Embedding innerGetEmbedding(String model, String input, int dimensions) throws Exception {
         String jsonInput = generateJsonBodyToGetEmbedding(model, input, dimensions);
         String jsonResponse = send(model, jsonInput);
+        AIModel.TokensUsage tokensUsage = extractTokensUsageFromJson(jsonResponse);
         AIModel.Embedding embedding = extractEmbeddingFromJson(jsonResponse);
+        embedding.setTokensUsage(tokensUsage);
         return embedding;
     }
 
@@ -396,9 +398,13 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         if(jsonObject.has("usage")) {
             JsonObject usage = jsonObject.getAsJsonObject("usage");
             tokensUsage.setInputTokens(usage.get("prompt_tokens").getAsInt());
-            tokensUsage.setOutputTokens(usage.get("completion_tokens").getAsInt());
-            JsonObject promptTokensDetails = usage.getAsJsonObject("prompt_tokens_details");
-            tokensUsage.setCachedTokens(promptTokensDetails.get("cached_tokens").getAsInt());
+            if(usage.has("completion_tokens")) {
+                tokensUsage.setOutputTokens(usage.get("completion_tokens").getAsInt());
+                if(usage.has("prompt_tokens_details")) {
+                    JsonObject promptTokensDetails = usage.getAsJsonObject("prompt_tokens_details");
+                    tokensUsage.setCachedTokens(promptTokensDetails.get("cached_tokens").getAsInt());
+                }
+            }
         }
 
         return tokensUsage;
@@ -682,7 +688,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         return gson.toJson(jsonBody);
     }
 
-    private String generateJsonBodyToGenerateSpeech(String model, AIModel.TextToSpeechPrompt textToSpeechPrompt) {
+    private String generateJsonBodyToTextToSpeech(String model, AIModel.TextToSpeechPrompt textToSpeechPrompt) {
         Gson gson = new Gson();
         JsonObject jsonBody = new JsonObject();
 

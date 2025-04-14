@@ -436,6 +436,7 @@ public class AIModel {
 
     public static class Embedding {
         private double[] data;
+        private TokensUsage tokensUsage;
 
         public Embedding(double[] inputData) {
             data = inputData;
@@ -447,6 +448,14 @@ public class AIModel {
 
         public double get(int index) {
             return data[index];
+        }
+
+        public TokensUsage getTokensUsage() {
+            return tokensUsage;
+        }
+
+        public void setTokensUsage(TokensUsage inputTokensUsage) {
+            tokensUsage = inputTokensUsage;
         }
 
         @Override
