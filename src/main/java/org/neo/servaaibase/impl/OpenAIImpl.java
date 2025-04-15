@@ -33,6 +33,9 @@ public class OpenAIImpl extends AbsOpenAIImpl {
     public static String o1_preview = "o1-preview";
     public static String o1_mini = "o1-mini";
     public static String gpt_4o_mini = "gpt-4o-mini";
+    public static String gpt_4o_mini_tts = "gpt-4o-mini-tts";
+    public static String gpt_4o_mini_transcribe = "gpt-4o-mini-transcribe";
+    public static String gpt_4o_transcribe = "gpt-4o-transcribe";
     public static String gpt_4o = "gpt-4o";
     public static String gpt_4_turbo_preview = "gpt-4-turbo-preview";
     public static String gpt_35_turbo = "gpt-3.5-turbo";
@@ -61,8 +64,8 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         embeddingModels = new String[]{text_embedding_3_large, text_embedding_3_small};
         imageModels = new String[]{dall_e_3, dall_e_2};
         visionModels = new String[]{o1, gpt_4o_mini, gpt_4o};
-        textToSpeechModels = new String[]{tts_1_hd, tts_1};
-        speechToTextModels = new String[]{whisper_1};
+        textToSpeechModels = new String[]{gpt_4o_mini_tts, tts_1_hd, tts_1};
+        speechToTextModels = new String[]{gpt_4o_transcribe, gpt_4o_mini_transcribe, whisper_1};
 
         urlMapping = new ConcurrentHashMap<String, String>();
         urlMapping.put(o3_mini, "https://api.openai.com/v1/chat/completions");
@@ -77,8 +80,11 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         urlMapping.put(text_embedding_3_small, "https://api.openai.com/v1/embeddings");
         urlMapping.put(dall_e_3, "https://api.openai.com/v1/images/generations");
         urlMapping.put(dall_e_2, "https://api.openai.com/v1/images/generations");
+        urlMapping.put(gpt_4o_mini_tts, "https://api.openai.com/v1/audio/speech");
         urlMapping.put(tts_1, "https://api.openai.com/v1/audio/speech");
         urlMapping.put(tts_1_hd, "https://api.openai.com/v1/audio/speech");
+        urlMapping.put(gpt_4o_transcribe, "https://api.openai.com/v1/audio/transcriptions");
+        urlMapping.put(gpt_4o_mini_transcribe, "https://api.openai.com/v1/audio/transcriptions");
         urlMapping.put(whisper_1, "https://api.openai.com/v1/audio/transcriptions");
 
         contextWindowMapping = new ConcurrentHashMap<String, Integer>();
