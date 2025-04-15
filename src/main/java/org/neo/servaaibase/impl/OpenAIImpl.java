@@ -28,6 +28,9 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         return new OpenAIImpl(inputDBConnection);
     }
 
+    public static String gpt_41 = "gpt-4.1";
+    public static String gpt_41_mini = "gpt-4.1-mini";
+    public static String gpt_41_nano = "gpt-4.1-nano";
     public static String o3_mini = "o3-mini";
     public static String o1 = "o1";
     public static String o1_preview = "o1-preview";
@@ -60,7 +63,7 @@ public class OpenAIImpl extends AbsOpenAIImpl {
     private Map<String, Boolean> supportSystemMapping;
 
     private void setup() {
-        chatModels = new String[]{o3_mini, o1, o1_preview, o1_mini, gpt_4o_mini, gpt_4o, gpt_4_turbo_preview, gpt_35_turbo};
+        chatModels = new String[]{gpt_41, gpt_41_mini, gpt_41_nano/*, o3_mini, o1, o1_preview, o1_mini, gpt_4o_mini, gpt_4o, gpt_4_turbo_preview, gpt_35_turbo*/};
         embeddingModels = new String[]{text_embedding_3_large, text_embedding_3_small};
         imageModels = new String[]{dall_e_3, dall_e_2};
         visionModels = new String[]{o1, gpt_4o_mini, gpt_4o};
@@ -68,6 +71,9 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         speechToTextModels = new String[]{gpt_4o_transcribe, gpt_4o_mini_transcribe, whisper_1};
 
         urlMapping = new ConcurrentHashMap<String, String>();
+        urlMapping.put(gpt_41, "https://api.openai.com/v1/chat/completions");
+        urlMapping.put(gpt_41_mini, "https://api.openai.com/v1/chat/completions");
+        urlMapping.put(gpt_41_nano, "https://api.openai.com/v1/chat/completions");
         urlMapping.put(o3_mini, "https://api.openai.com/v1/chat/completions");
         urlMapping.put(o1, "https://api.openai.com/v1/chat/completions");
         urlMapping.put(o1_preview, "https://api.openai.com/v1/chat/completions");
@@ -88,6 +94,9 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         urlMapping.put(whisper_1, "https://api.openai.com/v1/audio/transcriptions");
 
         contextWindowMapping = new ConcurrentHashMap<String, Integer>();
+        contextWindowMapping.put(gpt_41, 1047576);
+        contextWindowMapping.put(gpt_41_mini, 1047576);
+        contextWindowMapping.put(gpt_41_nano, 1047576);
         contextWindowMapping.put(o3_mini, 200000);
         contextWindowMapping.put(o1, 200000);
         contextWindowMapping.put(o1_preview, 128000);
@@ -98,6 +107,9 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         contextWindowMapping.put(gpt_35_turbo, 16385);
 
         maxOutputMapping = new ConcurrentHashMap<String, Integer>();
+        maxOutputMapping.put(gpt_41, 32768);
+        maxOutputMapping.put(gpt_41_mini, 32768);
+        maxOutputMapping.put(gpt_41_nano, 32768);
         maxOutputMapping.put(o3_mini, 100000);
         maxOutputMapping.put(o1, 100000);
         maxOutputMapping.put(o1_preview, 32768);
@@ -108,6 +120,9 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         maxOutputMapping.put(gpt_35_turbo, 4096);
 
         supportSystemMapping = new ConcurrentHashMap<String, Boolean>();
+        supportSystemMapping.put(gpt_41, true);
+        supportSystemMapping.put(gpt_41_mini, true);
+        supportSystemMapping.put(gpt_41_nano, true);
         supportSystemMapping.put(o3_mini, true);
         supportSystemMapping.put(o1, true);
         supportSystemMapping.put(o1_preview, false);
