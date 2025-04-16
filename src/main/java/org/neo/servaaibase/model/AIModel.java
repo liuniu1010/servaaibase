@@ -595,6 +595,10 @@ public class AIModel {
             index = inputIndex;
         }
 
+        public int getIndex() {
+            return index;
+        }
+
         @Override
         public String toString() {
             if(index == INDEX_CODECONTENT) {
