@@ -215,11 +215,11 @@ public class CommonUtil {
         rendered += "\n<p>";
 
         if(chatRecord.getIsRequest()) {
-            // rendered += RenderToShowAsOrigin(chatRecord.getContent());
-            rendered += RenderToShowAsHtml(chatRecord.getContent());
+            // rendered += renderToShowAsOrigin(chatRecord.getContent());
+            rendered += renderToShowAsHtml(chatRecord.getContent());
         }
         else {
-            rendered += RenderToShowAsHtml(chatRecord.getContent());
+            rendered += renderToShowAsHtml(chatRecord.getContent());
         }
         
         rendered += "\n</p>";
@@ -228,14 +228,14 @@ public class CommonUtil {
         return rendered;
     }
 
-    private static String RenderToShowAsOrigin(String content) {
+    public static String renderToShowAsOrigin(String content) {
         String renderOrigin = content.replace("<", "&lt");
         renderOrigin = renderOrigin.replace(">", "&gt");
         renderOrigin = renderOrigin.replace("\n", "<br>");
         return renderOrigin;
     }
 
-    private static String RenderToShowAsHtml(String content) {
+    public static String renderToShowAsHtml(String content) {
         String renderFormat = content.replace("\n", "<br>");
         return renderFormat;
     }
