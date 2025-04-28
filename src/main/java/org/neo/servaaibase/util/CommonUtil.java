@@ -380,6 +380,11 @@ public class CommonUtil {
         return base64; // If no prefix is present, return the original string
     }
 
+    public static String base64ToString(String base64) {
+        String rawBase64 = extractRawBase64(base64);
+        return IOUtil.rawBase64ToString(rawBase64);
+    }
+
     public static String base64ToFile(String base64, String onlineFileAbsolutePath) throws IOException {
         String mimeType = extractMimeTypeFromBase64(base64);
         String rawBase64 = extractRawBase64(base64); 
