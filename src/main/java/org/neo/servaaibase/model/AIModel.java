@@ -70,6 +70,88 @@ public class AIModel {
         }
     }
 
+    public static class Jobs {
+        public static final String ENTITYNAME = "jobs";
+        private VersionEntity versionEntity = null;
+
+        public static final String JOBID = "jobid";
+        public static final String JOBTYPE = "jobtype";
+        public static final String JOBSTATUS = "jobstatus";
+        public static final String JOBPARAM = "jobparam";
+        public static final String JOBOUTCOME = "joboutcome";
+        public static final String CREATETIME = "createtime";
+        public static final String EXPIRETIME = "expiretime";
+
+        public Jobs(VersionEntity inputVersionEntity) {
+            versionEntity = inputVersionEntity;
+        }
+
+        public Jobs(String jobId) {
+            versionEntity = new VersionEntity(ENTITYNAME);
+            versionEntity.setAttribute(JOBID, jobId);
+        }
+
+        public VersionEntity getVersionEntity() {
+            return versionEntity;
+        }
+
+        public String getJobId() {
+            return (String)versionEntity.getAttribute(JOBID);
+        }
+
+        public void setJobId(String inputJobId) {
+            versionEntity.setAttribute(JOBID, inputJobId);
+        }
+
+        public String getJobType() {
+            return (String)versionEntity.getAttribute(JOBTYPE);
+        }
+
+        public void setJobType(String inputJobType) {
+            versionEntity.setAttribute(JOBTYPE, inputJobType);
+        }
+
+        public String getJobStatus() {
+            return (String)versionEntity.getAttribute(JOBSTATUS);
+        }
+
+        public void setJobStatus(String inputJobStatus) {
+            versionEntity.setAttribute(JOBSTATUS, inputJobStatus);
+        }
+
+        public String getJobParam() {
+            return (String)versionEntity.getAttribute(JOBPARAM);
+        }
+
+        public void setJobParam(String inputJobParam) {
+            versionEntity.setAttribute(JOBPARAM, inputJobParam);
+        }
+
+        public String getJobOutcome() {
+            return (String)versionEntity.getAttribute(JOBOUTCOME);
+        }
+
+        public void setJobOutcome(String inputJobOutcome) {
+            versionEntity.setAttribute(JOBOUTCOME, inputJobOutcome);
+        }
+
+        public Date getCreatetime() {
+            return (Date)versionEntity.getAttribute(CREATETIME);
+        }
+
+        public void setCreatetime(Date inputCreatetime) {
+            versionEntity.setAttribute(CREATETIME, inputCreatetime);
+        }
+
+        public Date getExpiretime() {
+            return (Date)versionEntity.getAttribute(EXPIRETIME);
+        }
+
+        public void setExpiretime(Date inputExpiretime) {
+            versionEntity.setAttribute(EXPIRETIME, inputExpiretime);
+        }
+    }
+
     public static class ChatRecord {
         public static final String ENTITYNAME = "chatrecord";
         private VersionEntity versionEntity = null;
