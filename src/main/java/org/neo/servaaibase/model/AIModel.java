@@ -70,23 +70,23 @@ public class AIModel {
         }
     }
 
-    public static class Jobs {
+    public static class NeoJob {
         public static final String ENTITYNAME = "jobs";
         private VersionEntity versionEntity = null;
 
         public static final String JOBID = "jobid";
         public static final String JOBTYPE = "jobtype";
         public static final String JOBSTATUS = "jobstatus";
-        public static final String JOBPARAM = "jobparam";
+        public static final String JOBPARAMS = "jobparams";
         public static final String JOBOUTCOME = "joboutcome";
         public static final String CREATETIME = "createtime";
         public static final String EXPIRETIME = "expiretime";
 
-        public Jobs(VersionEntity inputVersionEntity) {
+        public NeoJob(VersionEntity inputVersionEntity) {
             versionEntity = inputVersionEntity;
         }
 
-        public Jobs(String jobId) {
+        public NeoJob(String jobId) {
             versionEntity = new VersionEntity(ENTITYNAME);
             versionEntity.setAttribute(JOBID, jobId);
         }
@@ -119,12 +119,12 @@ public class AIModel {
             versionEntity.setAttribute(JOBSTATUS, inputJobStatus);
         }
 
-        public String getJobParam() {
-            return (String)versionEntity.getAttribute(JOBPARAM);
+        public String getJobParams() {
+            return (String)versionEntity.getAttribute(JOBPARAMS);
         }
 
-        public void setJobParam(String inputJobParam) {
-            versionEntity.setAttribute(JOBPARAM, inputJobParam);
+        public void setJobParams(String inputJobParams) {
+            versionEntity.setAttribute(JOBPARAMS, inputJobParams);
         }
 
         public String getJobOutcome() {
