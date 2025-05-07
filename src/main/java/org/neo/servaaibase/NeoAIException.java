@@ -23,6 +23,7 @@ public class NeoAIException extends RuntimeException {
     public static int NEOAIEXCEPTION_FILESIZE_EXCEED_UPPERLIMIT = 16;
     public static int NEOAIEXCEPTION_LLM_TOO_BUSY = 17;
     public static int NEOAIEXCEPTION_NOT_WORKING_THREAD = 18;
+    public static int NEOAIEXCEPTION_JOB_NOTFOUND = 19;
    
     private static Map<Integer, String> defaultMapping = new ConcurrentHashMap<Integer, String>();
     static {
@@ -45,6 +46,7 @@ public class NeoAIException extends RuntimeException {
         defaultMapping.put(NEOAIEXCEPTION_FILESIZE_EXCEED_UPPERLIMIT, "File size exceed upper limit");
         defaultMapping.put(NEOAIEXCEPTION_LLM_TOO_BUSY, "Background LLM too busy");
         defaultMapping.put(NEOAIEXCEPTION_NOT_WORKING_THREAD, "Not working thread");
+        defaultMapping.put(NEOAIEXCEPTION_JOB_NOTFOUND, "Job not found");
     }
 
     private int code;

@@ -71,7 +71,7 @@ public class AIModel {
     }
 
     public static class NeoJob {
-        public static final String ENTITYNAME = "jobs";
+        public static final String ENTITYNAME = "neojob";
         private VersionEntity versionEntity = null;
 
         public static final String JOBID = "jobid";
