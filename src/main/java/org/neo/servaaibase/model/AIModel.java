@@ -79,6 +79,7 @@ public class AIModel {
         public static final String JOBSTATUS = "jobstatus";
         public static final String JOBPARAMS = "jobparams";
         public static final String JOBOUTCOME = "joboutcome";
+        public static final String MESSAGE = "message";
         public static final String CREATETIME = "createtime";
         public static final String EXPIRETIME = "expiretime";
 
@@ -133,6 +134,14 @@ public class AIModel {
 
         public void setJobOutcome(String inputJobOutcome) {
             versionEntity.setAttribute(JOBOUTCOME, inputJobOutcome);
+        }
+
+        public String getMessage() {
+            return (String)versionEntity.getAttribute(MESSAGE);
+        }
+
+        public void setMessage(String inputMessage) {
+            versionEntity.setAttribute(MESSAGE, inputMessage);
         }
 
         public Date getCreatetime() {
