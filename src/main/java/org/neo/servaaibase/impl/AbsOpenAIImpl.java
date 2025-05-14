@@ -143,9 +143,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
             }
             catch(NeoAIException nex) {
                 logger.error(nex.getMessage(), nex);
-                if(nex.getCode() == NeoAIException.NEOAIEXCEPTION_IOEXCEPTIONWITHLLM
-                    || nex.getCode() == NeoAIException.NEOAIEXCEPTION_JSONSYNTAXERROR ) {
-                    // met ioexception or syntax exception with LLM, wait some seconds and try again
+                if(nex.getCode() == NeoAIException.NEOAIEXCEPTION_LLM_TOO_BUSY) {
                     try {
                         logger.info("Meet IOException or syntax exception from LLM, wait " + waitSeconds + " seconds and try again...");
                         Thread.sleep(1000 * waitSeconds);
@@ -179,9 +177,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
             }
             catch(NeoAIException nex) {
                 logger.error(nex.getMessage(), nex);
-                if(nex.getCode() == NeoAIException.NEOAIEXCEPTION_IOEXCEPTIONWITHLLM
-                    || nex.getCode() == NeoAIException.NEOAIEXCEPTION_JSONSYNTAXERROR ) {
-                    // met ioexception or syntax exception with LLM, wait some seconds and try again
+                if(nex.getCode() == NeoAIException.NEOAIEXCEPTION_LLM_TOO_BUSY) {
                     try {
                         logger.info("Meet IOException or syntax exception from LLM, wait " + waitSeconds + " seconds and try again...");
                         Thread.sleep(1000 * waitSeconds);
@@ -202,7 +198,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
 
     private String[] innerGenerateImage(String model, AIModel.ImagePrompt imagePrompt) throws Exception {
         String jsonInput = generateJsonBodyToGenerateImage(model, imagePrompt);
-        String jsonResponse = send(model, jsonInput);
+        String jsonResponse = sendWithPost(model, jsonInput);
         String[] urls = extractImageUrlsFromJson(jsonResponse);
         return urls;
     }
@@ -216,9 +212,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
             }
             catch(NeoAIException nex) {
                 logger.error(nex.getMessage(), nex);
-                if(nex.getCode() == NeoAIException.NEOAIEXCEPTION_IOEXCEPTIONWITHLLM
-                    || nex.getCode() == NeoAIException.NEOAIEXCEPTION_JSONSYNTAXERROR ) {
-                    // met ioexception or syntax exception with LLM, wait some seconds and try again
+                if(nex.getCode() == NeoAIException.NEOAIEXCEPTION_LLM_TOO_BUSY) {
                     try {
                         logger.info("Meet IOException or syntax exception from LLM, wait " + waitSeconds + " seconds and try again...");
                         Thread.sleep(1000 * waitSeconds);
@@ -254,9 +248,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
             }
             catch(NeoAIException nex) {
                 logger.error(nex.getMessage(), nex);
-                if(nex.getCode() == NeoAIException.NEOAIEXCEPTION_IOEXCEPTIONWITHLLM
-                    || nex.getCode() == NeoAIException.NEOAIEXCEPTION_JSONSYNTAXERROR ) {
-                    // met ioexception or syntax exception with LLM, wait some seconds and try again
+                if(nex.getCode() == NeoAIException.NEOAIEXCEPTION_LLM_TOO_BUSY) {
                     try {
                         logger.info("Meet IOException or syntax exception from LLM, wait " + waitSeconds + " seconds and try again...");
                         Thread.sleep(1000 * waitSeconds);
@@ -291,9 +283,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
             }
             catch(NeoAIException nex) {
                 logger.error(nex.getMessage(), nex);
-                if(nex.getCode() == NeoAIException.NEOAIEXCEPTION_IOEXCEPTIONWITHLLM
-                    || nex.getCode() == NeoAIException.NEOAIEXCEPTION_JSONSYNTAXERROR ) {
-                    // met ioexception or syntax exception with LLM, wait some seconds and try again
+                if(nex.getCode() == NeoAIException.NEOAIEXCEPTION_LLM_TOO_BUSY) {
                     try {
                         logger.info("Meet IOException or syntax exception from LLM, wait " + waitSeconds + " seconds and try again...");
                         Thread.sleep(1000 * waitSeconds);
@@ -314,7 +304,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
 
     private AIModel.Embedding innerGetEmbedding(String model, String input, int dimensions) throws Exception {
         String jsonInput = generateJsonBodyToGetEmbedding(model, input, dimensions);
-        String jsonResponse = send(model, jsonInput);
+        String jsonResponse = sendWithPost(model, jsonInput);
         AIModel.TokensUsage tokensUsage = extractTokensUsageFromJson(jsonResponse);
         AIModel.Embedding embedding = extractEmbeddingFromJson(jsonResponse);
         embedding.setTokensUsage(tokensUsage);
@@ -338,7 +328,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
 
     private AIModel.ChatResponse innerFetchChatResponse(String model, AIModel.PromptStruct promptStruct, int maxTokens) throws Exception {
         String jsonInput = generateJsonBodyToFetchResponse(model, promptStruct, maxTokens);
-        String jsonResponse = send(model, jsonInput);
+        String jsonResponse = sendWithPost(model, jsonInput);
         List<AIModel.Call> calls = extractCallsFromJson(jsonResponse);
         AIModel.TokensUsage tokensUsage = extractTokensUsageFromJson(jsonResponse);
         AIModel.ChatResponse chatResponse = extractChatResponseFromJson(jsonResponse);
@@ -349,7 +339,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
 
     private int fetchPromptTokenNumber(String model, AIModel.PromptStruct promptStruct) throws Exception {
         String jsonInput = generateJsonBodyForGetTokenNumber(model, promptStruct);
-        String jsonTokenNumber = send(model, jsonInput);
+        String jsonTokenNumber = sendWithPost(model, jsonInput);
         int tokenNumber = extractTokenNumberFromJson(jsonTokenNumber);
         return tokenNumber;
     }
@@ -773,46 +763,51 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         }
     }
 
-    private String send(String model, String jsonInput) throws Exception {
+    /**
+     * Reads either the normal stream (2xx) or the error stream (4xx/5xx) from the connection.
+     */
+    private String readResponse(HttpURLConnection conn) throws IOException {
+        int status = conn.getResponseCode();
+        InputStream in = (status >= 400)?conn.getErrorStream():conn.getInputStream();
+
+        String body = CommonUtil.alignJson(IOUtil.inputStreamToString(in));
+        logger.info("return from remote api");
+        logger.info("HTTP " + status);
+        logger.info("response = " + body);
+        if(status == 429) {
+            throw new NeoAIException(NeoAIException.NEOAIEXCEPTION_LLM_TOO_BUSY);
+        }
+        return body;
+    }
+
+    private String sendWithPost(String model, String jsonInput) throws Exception {
         jsonInput = CommonUtil.alignJson(jsonInput);
-        logger.info("call openai api, model = " + model + ", jsonInput = " + jsonInput);
-        URL url = new URL(getUrl(model));
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        String sUrl = getUrl(model);
+        URL url = new URL(sUrl);
+        logger.info("call remote api"); 
+        logger.info("POST " + sUrl);
+        logger.info("body = " + jsonInput);
+        logger.info("model =" + model);
+
+        HttpURLConnection conn = null;
         try {
-            connection.setRequestMethod("POST");
+            conn = (HttpURLConnection)url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty("Authorization", "Bearer " + getApiKey());
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setDoOutput(true);
 
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setRequestProperty("Authorization", "Bearer " + getApiKey());
-
-            connection.setDoOutput(true);
-
-            try (OutputStream os = connection.getOutputStream()){
+            try (OutputStream os = conn.getOutputStream()) {
                 IOUtil.stringToOutputStream(jsonInput, os);
             }
 
-            try (InputStream in = connection.getInputStream()){
-                String response = IOUtil.inputStreamToString(in);
-                response = CommonUtil.alignJson(response);
-                logger.info("return from openai api, response = " + response);
-                return response;
-            }
-        }
-        catch(IOException iex) {
-            try (InputStream errIn = connection.getErrorStream()) {
-                String errorResponse = IOUtil.inputStreamToString(errIn);
-                logger.error("get IOException from openai api, response = " + errorResponse, iex);
-            }
-            throw new NeoAIException(NeoAIException.NEOAIEXCEPTION_IOEXCEPTIONWITHLLM, iex);
-        }
-        catch(Exception ex) {
-            try (InputStream errIn = connection.getErrorStream()) {
-                String errorResponse = IOUtil.inputStreamToString(errIn);
-                logger.error("get Exception from openai api, response = " + errorResponse, ex);
-            }
-            throw new NeoAIException(ex);
+            return readResponse(conn);
         }
         finally {
-            connection.disconnect();
+            if (conn != null) {
+                conn.disconnect();
+            }
         }
     }
 }
