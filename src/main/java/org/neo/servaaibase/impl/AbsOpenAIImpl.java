@@ -736,6 +736,10 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         if(status == 429) {
             throw new NeoAIException(NeoAIException.NEOAIEXCEPTION_LLM_TOO_BUSY);
         }
+        else if(status >= 400) {
+            String message = IOUtil.inputStreamToString(in);
+            throw new NeoAIException(message);
+        }
         return body;
     }
 
@@ -762,7 +766,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         logger.info("call remote api"); 
         logger.info("POST " + sUrl);
         logger.info("body = " + jsonInput);
-        logger.info("model =" + model);
+        logger.info("model = " + model);
 
         HttpURLConnection conn = null;
         try {
