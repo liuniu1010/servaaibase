@@ -198,7 +198,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
 
     private String[] innerGenerateImage(String model, AIModel.ImagePrompt imagePrompt) throws Exception {
         String jsonInput = generateJsonBodyToGenerateImage(model, imagePrompt);
-        String jsonResponse = sendWithPost(model, jsonInput);
+        String jsonResponse = sendPost(model, jsonInput);
         String[] urls = extractImageUrlsFromJson(jsonResponse);
         return urls;
     }
@@ -235,7 +235,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         String jsonInput = generateJsonBodyToTextToSpeech(model, textToSpeechPrompt);
         String fileName = "audio_" + CommonUtil.getRandomString(10) + "." + textToSpeechPrompt.getOutputFormat();
         String filePath = CommonUtil.normalizeFolderPath(onlineFileAbsolutePath) + File.separator + fileName;
-        sendAndGenerateFile(model, jsonInput, filePath);
+        sendPostAndGenerateFile(model, jsonInput, filePath);
         return fileName;
     }
 
@@ -269,7 +269,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
 
     private AIModel.ChatResponse innerSpeechToText(String model, AIModel.Attachment attachment) throws Exception {
         String filePath = attachment.getContent();
-        String jsonResponse = sendWithFormData(model, filePath);
+        String jsonResponse = sendPostWithFormData(model, filePath);
         AIModel.ChatResponse chatResponse = extractTextFromSpeechJson(jsonResponse);
         return chatResponse;
     }
@@ -304,7 +304,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
 
     private AIModel.Embedding innerGetEmbedding(String model, String input, int dimensions) throws Exception {
         String jsonInput = generateJsonBodyToGetEmbedding(model, input, dimensions);
-        String jsonResponse = sendWithPost(model, jsonInput);
+        String jsonResponse = sendPost(model, jsonInput);
         AIModel.TokensUsage tokensUsage = extractTokensUsageFromJson(jsonResponse);
         AIModel.Embedding embedding = extractEmbeddingFromJson(jsonResponse);
         embedding.setTokensUsage(tokensUsage);
@@ -328,7 +328,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
 
     private AIModel.ChatResponse innerFetchChatResponse(String model, AIModel.PromptStruct promptStruct, int maxTokens) throws Exception {
         String jsonInput = generateJsonBodyToFetchResponse(model, promptStruct, maxTokens);
-        String jsonResponse = sendWithPost(model, jsonInput);
+        String jsonResponse = sendPost(model, jsonInput);
         List<AIModel.Call> calls = extractCallsFromJson(jsonResponse);
         AIModel.TokensUsage tokensUsage = extractTokensUsageFromJson(jsonResponse);
         AIModel.ChatResponse chatResponse = extractChatResponseFromJson(jsonResponse);
@@ -339,7 +339,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
 
     private int fetchPromptTokenNumber(String model, AIModel.PromptStruct promptStruct) throws Exception {
         String jsonInput = generateJsonBodyForGetTokenNumber(model, promptStruct);
-        String jsonTokenNumber = sendWithPost(model, jsonInput);
+        String jsonTokenNumber = sendPost(model, jsonInput);
         int tokenNumber = extractTokenNumberFromJson(jsonTokenNumber);
         return tokenNumber;
     }
@@ -690,50 +690,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         return gson.toJson(jsonBody);
     }
 
-    private void sendAndGenerateFile(String model, String jsonInput, String filePath) throws Exception {
-        logger.info("call openai api, model = " + model + ", jsonInput = " + jsonInput);
-        URL url = new URL(getUrl(model));
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        try {
-            connection.setRequestMethod("POST");
-
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setRequestProperty("Authorization", "Bearer " + getApiKey());
-
-            connection.setDoOutput(true);
-
-            try (OutputStream os = connection.getOutputStream()){
-                IOUtil.stringToOutputStream(jsonInput, os);
-            }
-
-            try (InputStream in = connection.getInputStream()){
-                IOUtil.inputStreamToFile(in, filePath);
-                logger.info("return from openai api, file [" + filePath +"] generated."); 
-            }
-        }
-        catch(IOException iex) {
-            try (InputStream errIn = connection.getErrorStream()) {
-                String errorResponse = IOUtil.inputStreamToString(errIn);
-                logger.error("get IOException from openai api, response = " + errorResponse, iex);
-            }
-            throw new NeoAIException(NeoAIException.NEOAIEXCEPTION_IOEXCEPTIONWITHLLM, iex);
-        }
-        catch(Exception ex) {
-            logger.error("get exeception in sending, " + ex.getMessage(), ex);
-            try (InputStream errIn = connection.getErrorStream()) {
-                if(errIn != null) {
-                    String errorResponse = IOUtil.inputStreamToString(errIn);
-                    logger.error("get exception from openai api, response = " + errorResponse);
-                }
-            }
-            throw new NeoAIException(ex);
-        }
-        finally {
-            connection.disconnect();
-        }
-    }
-
-    private String sendWithFormData(String model, String filePath) throws Exception {
+    private String sendPostWithFormData(String model, String filePath) throws Exception {
         logger.info("call openai api, model = " + model + ", filePath = " + filePath);
         OkHttpClient client = new OkHttpClient();
         
@@ -752,6 +709,11 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
                 .build();
 
         try (Response response = client.newCall(request).execute()) {
+            int status = response.code();
+            if(status == 429) {
+                throw new NeoAIException(NeoAIException.NEOAIEXCEPTION_LLM_TOO_BUSY);
+            }
+
             if (!response.isSuccessful()) {
                 throw new NeoAIException("Unexpected code " + response);
             }
@@ -763,10 +725,7 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         }
     }
 
-    /**
-     * Reads either the normal stream (2xx) or the error stream (4xx/5xx) from the connection.
-     */
-    private String readResponse(HttpURLConnection conn) throws IOException {
+    private String readResponseToString(HttpURLConnection conn) throws IOException {
         int status = conn.getResponseCode();
         InputStream in = (status >= 400)?conn.getErrorStream():conn.getInputStream();
 
@@ -780,7 +739,23 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         return body;
     }
 
-    private String sendWithPost(String model, String jsonInput) throws Exception {
+    private void readResponseToFile(HttpURLConnection conn, String filePath) throws IOException {
+        int status = conn.getResponseCode();
+        InputStream in = (status >= 400)?conn.getErrorStream():conn.getInputStream();
+
+        if(status == 429) {
+            throw new NeoAIException(NeoAIException.NEOAIEXCEPTION_LLM_TOO_BUSY);
+        }
+        else if(status >= 400) {
+            String message = IOUtil.inputStreamToString(in);
+            throw new NeoAIException(message);
+        }
+
+        IOUtil.inputStreamToFile(in, filePath);
+        logger.info("return from openai api, file [" + filePath +"] generated."); 
+    }
+
+    private String sendPost(String model, String jsonInput) throws Exception {
         jsonInput = CommonUtil.alignJson(jsonInput);
         String sUrl = getUrl(model);
         URL url = new URL(sUrl);
@@ -802,7 +777,37 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
                 IOUtil.stringToOutputStream(jsonInput, os);
             }
 
-            return readResponse(conn);
+            return readResponseToString(conn);
+        }
+        finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+    }
+
+    private void sendPostAndGenerateFile(String model, String jsonInput, String filePath) throws Exception {
+        jsonInput = CommonUtil.alignJson(jsonInput);
+        String sUrl = getUrl(model);
+        URL url = new URL(sUrl);
+        logger.info("call remote api"); 
+        logger.info("POST " + sUrl);
+        logger.info("body = " + jsonInput);
+        logger.info("model =" + model);
+
+        HttpURLConnection conn = null;
+        try {
+            conn = (HttpURLConnection)url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty("Authorization", "Bearer " + getApiKey());
+            conn.setDoOutput(true);
+
+            try (OutputStream os = conn.getOutputStream()) {
+                IOUtil.stringToOutputStream(jsonInput, os);
+            }
+
+            readResponseToFile(conn, filePath);
         }
         finally {
             if (conn != null) {
