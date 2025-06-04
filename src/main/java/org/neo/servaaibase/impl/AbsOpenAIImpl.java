@@ -3,6 +3,7 @@ package org.neo.servaaibase.impl;
 import java.util.List;
 import java.util.Set;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -692,7 +693,11 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
 
     private String sendPostWithFormData(String model, String filePath) throws Exception {
         logger.info("call openai api, model = " + model + ", filePath = " + filePath);
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = new OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .build();
         
         String fileName = CommonUtil.getFileName(filePath);
         RequestBody requestBody = new MultipartBody.Builder()
@@ -705,7 +710,6 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
                 .url(getUrl(model))
                 .post(requestBody)
                 .addHeader("Authorization", "Bearer " + getApiKey())
-                .addHeader("Content-Type", "multipart/form-data")
                 .build();
 
         try (Response response = client.newCall(request).execute()) {
