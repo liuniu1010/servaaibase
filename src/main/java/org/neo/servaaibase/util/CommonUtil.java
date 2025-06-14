@@ -54,6 +54,17 @@ import java.io.StringReader;
 
 public class CommonUtil {
     final static org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(CommonUtil.class);
+
+    public static Map<String, String> getConfigValues(String[] configNames) {
+        DBServiceIFC dbService = ServiceFactory.getDBService();
+        return (Map<String, String>)dbService.executeQueryTask(new DBQueryTaskIFC() {
+            @Override
+            public Object query(DBConnectionIFC dbConnection) {
+                return CommonUtil.getConfigValues(dbConnection, configNames);
+            }
+        });
+    }
+
     public static String getConfigValue(String configName) {
         DBServiceIFC dbService = ServiceFactory.getDBService();
         return (String)dbService.executeQueryTask(new DBQueryTaskIFC() {
@@ -62,6 +73,15 @@ public class CommonUtil {
                 return CommonUtil.getConfigValue(dbConnection, configName);
             }
         });
+    }
+
+    public static Map<String, String> getConfigValues(DBConnectionIFC dbConnection, String[] configNames) {
+        Map<String, String> map = new ConcurrentHashMap<String, String>();
+        for(String configName: configNames) {
+            String configValue = getConfigValue(dbConnection, configName);
+            map.put(configName, configValue);
+        }
+        return map;
     }
 
     public static String getConfigValue(DBConnectionIFC dbConnection, String configName) {
