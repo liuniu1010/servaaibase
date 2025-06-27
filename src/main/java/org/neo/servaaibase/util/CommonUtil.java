@@ -76,12 +76,38 @@ public class CommonUtil {
     }
 
     public static Map<String, String> getConfigValues(DBConnectionIFC dbConnection, String[] configNames) {
-        Map<String, String> map = new ConcurrentHashMap<String, String>();
-        for(String configName: configNames) {
-            String configValue = getConfigValue(dbConnection, configName);
-            map.put(configName, configValue);
+        try {
+            String sql = "select configname as configName";
+            sql += ", configvalue as configValue";
+            sql += " from configs";
+            sql += " where configname in (";
+            for(int i = 0;i < configNames.length;i++) {
+                sql += (i == 0)?"?":", ?";
+            }
+            sql += ")";
+
+            List<Object> params = new ArrayList<Object>();
+            for(String configName: configNames) {
+                params.add(configName);
+            }
+
+            SQLStruct sqlStruct = new SQLStruct(sql, params);
+
+            List<Map<String, Object>> listDbMap = dbConnection.query(sqlStruct);
+
+            Map<String, String> map = new ConcurrentHashMap<String, String>();
+            for(Map<String, Object> dbMap: listDbMap) {
+                map.put((String)dbMap.get("configName"), (String)dbMap.get("configValue"));
+            }
+
+            return map;
+        } 
+        catch(NeoAIException nex) {
+            throw nex;
         }
-        return map;
+        catch(Exception ex) {
+            throw new NeoAIException(ex);
+        }
     }
 
     public static String getConfigValue(DBConnectionIFC dbConnection, String configName) {

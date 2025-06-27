@@ -90,6 +90,21 @@ public class CommonUtilTest
         }
     }
 
+    public void testGetConfigValues() throws Exception {
+        String[] configNames = new String[]{"consumedCreditsOnCoderBot"
+                                           ,"consumedCreditsOnSpeechSplit"
+                                           ,"consumedCreditsOnUtilityBot"
+                                           ,"consumedCreditsOnChatWithAssistant"
+                                           ,"consumedCreditsOnSpeechToText"
+                                           ,"paymentLinkOnStripe"
+                                           ,"topupOnRegister"};
+        Map<String, String> configMap = CommonUtil.getConfigValues(configNames);
+        for(String configName: configNames) {
+            String configValue = configMap.get(configName);
+            System.out.println(configName + ": " + configValue);
+        }
+    }
+
     public void testMimeTypeBase64() {
         String rawBase64 = "iVBORw0KGgoA";
         String mimeType = "image/png";
