@@ -65,10 +65,10 @@ public class OpenAIImpl extends AbsOpenAIImpl {
     private Map<String, Boolean> supportSystemMapping;
 
     private void setup() {
-        chatModels = new String[]{gpt_41, gpt_41_mini, gpt_41_nano, o4_mini, /*o3,*/ o3_mini, o1, o1_preview, o1_mini, gpt_4o_mini, gpt_4o, gpt_4_turbo_preview, gpt_35_turbo};
+        chatModels = new String[]{gpt_41, gpt_41_mini, gpt_41_nano, o4_mini, o3, o3_mini, o1, o1_preview, o1_mini, gpt_4o_mini, gpt_4o, gpt_4_turbo_preview, gpt_35_turbo};
         embeddingModels = new String[]{text_embedding_3_large, text_embedding_3_small};
         imageModels = new String[]{dall_e_3, dall_e_2};
-        visionModels = new String[]{o1, gpt_4o_mini, gpt_4o};
+        visionModels = new String[]{o3, o1, gpt_4o_mini, gpt_4o};
         textToSpeechModels = new String[]{gpt_4o_mini_tts, tts_1_hd, tts_1};
         speechToTextModels = new String[]{gpt_4o_transcribe, gpt_4o_mini_transcribe, whisper_1};
 
