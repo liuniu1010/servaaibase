@@ -53,7 +53,7 @@ import com.google.gson.stream.JsonReader;
 import java.io.StringReader;
 
 public class CommonUtil {
-    final static org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(CommonUtil.class);
+    final static org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager.getLogger(CommonUtil.class);
 
     public static Map<String, String> getConfigValues(String[] configNames) {
         DBServiceIFC dbService = ServiceFactory.getDBService();

@@ -36,7 +36,7 @@ import org.neo.servaaibase.util.CommonUtil;
 import org.neo.servaaibase.NeoAIException;
 
 abstract public class AbsOpenAIImpl implements SuperAIIFC {
-    final static org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(AbsOpenAIImpl.class);
+    final static org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager.getLogger(AbsOpenAIImpl.class);
 
     abstract protected String getApiKey();
     abstract protected String getUrl(String model);
