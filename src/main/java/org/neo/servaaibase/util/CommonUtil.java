@@ -57,9 +57,9 @@ public class CommonUtil {
 
     public static Map<String, String> getConfigValues(String[] configNames) {
         DBServiceIFC dbService = ServiceFactory.getDBService();
-        return (Map<String, String>)dbService.executeQueryTask(new DBQueryTaskIFC() {
+        return (Map<String, String>)dbService.executeQueryTask(new DBQueryTaskIFC<Map<String, String>>() {
             @Override
-            public Object query(DBConnectionIFC dbConnection) {
+            public Map<String, String> query(DBConnectionIFC dbConnection) {
                 return CommonUtil.getConfigValues(dbConnection, configNames);
             }
         });
@@ -67,9 +67,9 @@ public class CommonUtil {
 
     public static String getConfigValue(String configName) {
         DBServiceIFC dbService = ServiceFactory.getDBService();
-        return (String)dbService.executeQueryTask(new DBQueryTaskIFC() {
+        return (String)dbService.executeQueryTask(new DBQueryTaskIFC<String>() {
             @Override
-            public Object query(DBConnectionIFC dbConnection) {
+            public String query(DBConnectionIFC dbConnection) {
                 return CommonUtil.getConfigValue(dbConnection, configName);
             }
         });
