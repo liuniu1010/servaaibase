@@ -346,104 +346,205 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
     }
 
     private int extractTokenNumberFromJson(String jsonTokenNumber) {
-        JsonElement element = JsonParser.parseString(jsonTokenNumber);
-        JsonObject jsonObject = element.getAsJsonObject();
-        int tokenNumber = jsonObject.getAsJsonObject("usage").get("prompt_tokens").getAsInt();
-        return tokenNumber;
+        try {
+            JsonElement element = JsonParser.parseString(jsonTokenNumber);
+            if (!element.isJsonObject()) {
+                throw new NeoAIException("Token response is not a JSON object");
+            }
+            JsonObject jsonObject = element.getAsJsonObject();
+            JsonObject usage = jsonObject.has("usage") && jsonObject.get("usage").isJsonObject()
+                    ? jsonObject.getAsJsonObject("usage")
+                    : null;
+            if (usage == null || !usage.has("prompt_tokens") || usage.get("prompt_tokens").isJsonNull()) {
+                throw new NeoAIException("prompt_tokens is missing in usage response");
+            }
+            return usage.get("prompt_tokens").getAsInt();
+        }
+        catch (JsonSyntaxException ex) {
+            throw new NeoAIException("Invalid JSON when extracting prompt token number", ex);
+        }
     }
 
     private AIModel.Embedding extractEmbeddingFromJson(String jsonResponse) {
-        JsonElement element = JsonParser.parseString(jsonResponse);
-        JsonObject jsonObject = element.getAsJsonObject();
+        try {
+            JsonElement element = JsonParser.parseString(jsonResponse);
+            if (!element.isJsonObject()) {
+                throw new NeoAIException("Embedding response is not a JSON object");
+            }
+            JsonObject jsonObject = element.getAsJsonObject();
 
-        JsonArray dataArray = jsonObject.getAsJsonArray("data").get(0).getAsJsonObject().getAsJsonArray("embedding");
+            JsonArray dataArray = jsonObject.has("data") && jsonObject.get("data").isJsonArray()
+                    ? jsonObject.getAsJsonArray("data")
+                    : null;
+            if (dataArray == null || dataArray.size() == 0) {
+                throw new NeoAIException("Embedding response has no data array");
+            }
 
-        int size = dataArray.size();
-        double[] data = new double[size];
-        for(int i = 0;i < size;i++) {
-            data[i] = dataArray.get(i).getAsDouble();
+            JsonObject firstEmbedding = dataArray.get(0).isJsonObject() ? dataArray.get(0).getAsJsonObject() : null;
+            if (firstEmbedding == null || !firstEmbedding.has("embedding") || !firstEmbedding.get("embedding").isJsonArray()) {
+                throw new NeoAIException("Embedding vector missing in response");
+            }
+
+            JsonArray vector = firstEmbedding.getAsJsonArray("embedding");
+            double[] data = new double[vector.size()];
+            for (int i = 0; i < vector.size(); i++) {
+                data[i] = vector.get(i).getAsDouble();
+            }
+
+            return new AIModel.Embedding(data);
         }
-
-        AIModel.Embedding embedding = new AIModel.Embedding(data);
-        return embedding;
+        catch (JsonSyntaxException ex) {
+            throw new NeoAIException("Invalid JSON when extracting embedding", ex);
+        }
     }
 
     private String[] extractImageUrlsFromJson(String jsonResponse) {
-        JsonElement element = JsonParser.parseString(jsonResponse);
-        JsonObject jsonObject = element.getAsJsonObject();
+        try {
+            JsonElement element = JsonParser.parseString(jsonResponse);
+            if (!element.isJsonObject()) {
+                throw new NeoAIException("Image response is not a JSON object");
+            }
+            JsonObject jsonObject = element.getAsJsonObject();
 
-        JsonArray jsonData = jsonObject.getAsJsonArray("data");
-        String[] urls = new String[jsonData.size()];
-        for(int i = 0;i < jsonData.size();i++) {
-            String url = jsonData.get(i).getAsJsonObject().get("url").getAsString();
-            urls[i] = url;
+            JsonArray jsonData = jsonObject.has("data") && jsonObject.get("data").isJsonArray()
+                    ? jsonObject.getAsJsonArray("data")
+                    : null;
+            if (jsonData == null || jsonData.size() == 0) {
+                throw new NeoAIException("Image response has no data array");
+            }
+
+            List<String> collected = new ArrayList<String>();
+            for (int i = 0; i < jsonData.size(); i++) {
+                JsonObject dataObject = jsonData.get(i).isJsonObject() ? jsonData.get(i).getAsJsonObject() : null;
+                if (dataObject == null) {
+                    continue;
+                }
+                if (dataObject.has("url") && !dataObject.get("url").isJsonNull()) {
+                    collected.add(dataObject.get("url").getAsString());
+                }
+                else if (dataObject.has("b64_json") && !dataObject.get("b64_json").isJsonNull()) {
+                    collected.add(dataObject.get("b64_json").getAsString());
+                }
+            }
+
+            if (collected.isEmpty()) {
+                throw new NeoAIException("Image response contains no url or b64_json fields");
+            }
+
+            return collected.toArray(new String[collected.size()]);
         }
-
-        return urls;
+        catch (JsonSyntaxException ex) {
+            throw new NeoAIException("Invalid JSON when extracting image urls", ex);
+        }
     }
 
     private AIModel.TokensUsage extractTokensUsageFromJson(String jsonResponse) throws Exception {
         AIModel.TokensUsage tokensUsage = new AIModel.TokensUsage();
-        JsonElement element = JsonParser.parseString(jsonResponse);
-        JsonObject jsonObject = element.getAsJsonObject();
-        if(jsonObject.has("usage")) {
+        try {
+            JsonElement element = JsonParser.parseString(jsonResponse);
+            if (!element.isJsonObject()) {
+                return tokensUsage;
+            }
+            JsonObject jsonObject = element.getAsJsonObject();
+            if (!jsonObject.has("usage") || !jsonObject.get("usage").isJsonObject()) {
+                return tokensUsage;
+            }
+
             JsonObject usage = jsonObject.getAsJsonObject("usage");
-            tokensUsage.setInputTokens(usage.get("prompt_tokens").getAsInt());
-            if(usage.has("completion_tokens")) {
+            if (usage.has("prompt_tokens") && !usage.get("prompt_tokens").isJsonNull()) {
+                tokensUsage.setInputTokens(usage.get("prompt_tokens").getAsInt());
+            }
+            if (usage.has("completion_tokens") && !usage.get("completion_tokens").isJsonNull()) {
                 tokensUsage.setOutputTokens(usage.get("completion_tokens").getAsInt());
-                if(usage.has("prompt_tokens_details")) {
-                    JsonObject promptTokensDetails = usage.getAsJsonObject("prompt_tokens_details");
+            }
+
+            if (usage.has("prompt_tokens_details") && usage.get("prompt_tokens_details").isJsonObject()) {
+                JsonObject promptTokensDetails = usage.getAsJsonObject("prompt_tokens_details");
+                if (promptTokensDetails.has("cached_tokens") && !promptTokensDetails.get("cached_tokens").isJsonNull()) {
                     tokensUsage.setCachedTokens(promptTokensDetails.get("cached_tokens").getAsInt());
                 }
             }
+        }
+        catch (JsonSyntaxException ex) {
+            throw new NeoAIException("Invalid JSON when extracting token usage", ex);
         }
 
         return tokensUsage;
     }
 
     private List<AIModel.Call> extractCallsFromJson(String jsonResponse) throws Exception {
-        List<AIModel.Call> calls = null;
-        JsonElement element = JsonParser.parseString(jsonResponse);
-        JsonObject jsonObject = element.getAsJsonObject();
-        if(jsonObject.has("choices")) {
-            JsonArray choicesArray = jsonObject.getAsJsonArray("choices");
-            JsonObject firstChoice = choicesArray.get(0).getAsJsonObject();
-            JsonObject messageObject = firstChoice.getAsJsonObject("message");
-
-            if(!messageObject.has("tool_calls")) {
+        List<AIModel.Call> calls = new ArrayList<AIModel.Call>();
+        try {
+            JsonElement element = JsonParser.parseString(jsonResponse);
+            if (!element.isJsonObject()) {
                 return null;
             }
-            JsonArray toolCallsArray = messageObject.getAsJsonArray("tool_calls");
-            if(toolCallsArray != null
-                && !toolCallsArray.isJsonNull()
-                && toolCallsArray.size() > 0) {
-                calls = new ArrayList<AIModel.Call>();
-                for(int i = 0;i < toolCallsArray.size();i++) {
-                    JsonObject tool = toolCallsArray.get(i).getAsJsonObject();
-                    if(!tool.get("type").getAsString().equals("function")) {
+            JsonObject jsonObject = element.getAsJsonObject();
+            if (!jsonObject.has("choices") || !jsonObject.get("choices").isJsonArray()) {
+                return null;
+            }
+
+            JsonArray choicesArray = jsonObject.getAsJsonArray("choices");
+            for (int i = 0; i < choicesArray.size(); i++) {
+                JsonObject choiceObject = choicesArray.get(i).isJsonObject() ? choicesArray.get(i).getAsJsonObject() : null;
+                if (choiceObject == null || !choiceObject.has("message") || !choiceObject.get("message").isJsonObject()) {
+                    continue;
+                }
+                JsonObject messageObject = choiceObject.getAsJsonObject("message");
+                if (!messageObject.has("tool_calls") || !messageObject.get("tool_calls").isJsonArray()) {
+                    continue;
+                }
+
+                JsonArray toolCallsArray = messageObject.getAsJsonArray("tool_calls");
+                for (int j = 0; j < toolCallsArray.size(); j++) {
+                    JsonObject tool = toolCallsArray.get(j).isJsonObject() ? toolCallsArray.get(j).getAsJsonObject() : null;
+                    if (tool == null || !tool.has("type") || tool.get("type").isJsonNull()) {
+                        continue;
+                    }
+                    String type = tool.get("type").getAsString();
+                    if (!"function".equals(type)) {
                         continue;
                     }
 
-                    JsonObject functionObject = tool.getAsJsonObject("function");
-                    AIModel.Call call = new AIModel.Call();
-                    String methodName = functionObject.get("name").getAsString();
-                    if(methodName.startsWith("multi_tool_use")) {
-                        // not support this case
+                    JsonObject functionObject = tool.has("function") && tool.get("function").isJsonObject()
+                            ? tool.getAsJsonObject("function")
+                            : null;
+                    if (functionObject == null || !functionObject.has("name") || functionObject.get("name").isJsonNull()) {
                         continue;
                     }
+
+                    String methodName = functionObject.get("name").getAsString();
+                    if (methodName.startsWith("multi_tool_use")) {
+                        continue;
+                    }
+
+                    AIModel.Call call = new AIModel.Call();
                     call.setMethodName(methodName);
 
-                    String argumentsString = functionObject.get("arguments").getAsString();
+                    JsonElement argumentsElement = functionObject.get("arguments");
+                    String argumentsString = argumentsElement == null || argumentsElement.isJsonNull()
+                            ? ""
+                            : (argumentsElement.isJsonPrimitive() && argumentsElement.getAsJsonPrimitive().isString()
+                                ? argumentsElement.getAsString()
+                                : argumentsElement.toString());
+
                     List<AIModel.CallParam> callParams = extractArgumentsString(argumentsString);
                     call.setParams(callParams);
                     calls.add(call);
                 }
             }
         }
-        return calls; 
+        catch (JsonSyntaxException ex) {
+            throw new NeoAIException("Invalid JSON when extracting tool calls", ex);
+        }
+
+        return calls.isEmpty() ? null : calls;
     }
 
     private boolean isJsonString(String argumentsString) {
+        if (argumentsString == null || argumentsString.isEmpty()) {
+            return false;
+        }
         try {
             JsonParser.parseString(argumentsString);
             return true;
@@ -455,18 +556,37 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
     // it seems this is openai's bug, handle possible bugs in this method
     private List<AIModel.CallParam> extractArgumentsString(String argumentsString) {
         List<AIModel.CallParam> callParams = new ArrayList<AIModel.CallParam>();
-        if(isJsonString(argumentsString)) { // by design it should be a json string, sometimes it return a normal string
-            JsonElement elementArguments = JsonParser.parseString(argumentsString);
-            JsonObject argumentsObject = elementArguments.getAsJsonObject();
-            if(argumentsObject != null
-                && !argumentsObject.isJsonNull()) {
-                Set<String> paramNames = argumentsObject.keySet();
-                for(String paramName: paramNames) {
+        if (argumentsString == null) {
+            return callParams;
+        }
+
+        if (isJsonString(argumentsString)) { // by design it should be a json string, sometimes it return a normal string
+            try {
+                JsonElement elementArguments = JsonParser.parseString(argumentsString);
+                if (elementArguments.isJsonObject()) {
+                    JsonObject argumentsObject = elementArguments.getAsJsonObject();
+                    Set<String> paramNames = argumentsObject.keySet();
+                    for (String paramName : paramNames) {
+                        AIModel.CallParam callParam = new AIModel.CallParam();
+                        callParam.setName(paramName);
+                        JsonElement valueElement = argumentsObject.get(paramName);
+                        callParam.setValue(valueElement == null || valueElement.isJsonNull() ? null : valueElement.toString());
+                        callParams.add(callParam);
+                    }
+                }
+                else if (elementArguments.isJsonArray()) {
                     AIModel.CallParam callParam = new AIModel.CallParam();
-                    callParam.setName(paramName);
-                    callParam.setValue(argumentsObject.get(paramName).getAsString());
+                    callParam.setName(AIModel.CallParam.UNKNOWN);
+                    callParam.setValue(elementArguments.toString());
                     callParams.add(callParam);
                 }
+            }
+            catch (JsonSyntaxException ex) {
+                // fall back to treating the payload as raw text
+                AIModel.CallParam callParam = new AIModel.CallParam();
+                callParam.setName(AIModel.CallParam.UNKNOWN);
+                callParam.setValue(argumentsString);
+                callParams.add(callParam);
             }
         }
         else {
@@ -480,34 +600,80 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
     }
 
     private AIModel.ChatResponse extractTextFromSpeechJson(String jsonResponse) throws Exception {
-        JsonElement element = JsonParser.parseString(jsonResponse);
-        JsonObject jsonObject = element.getAsJsonObject();
-        String text = jsonObject.get("text").getAsString();
-        return new AIModel.ChatResponse(true, text);
+        try {
+            JsonElement element = JsonParser.parseString(jsonResponse);
+            if (!element.isJsonObject()) {
+                throw new NeoAIException("Speech-to-text response is not a JSON object");
+            }
+            JsonObject jsonObject = element.getAsJsonObject();
+            if (jsonObject.has("text") && !jsonObject.get("text").isJsonNull()) {
+                String text = jsonObject.get("text").getAsString();
+                return new AIModel.ChatResponse(true, text);
+            }
+            if (jsonObject.has("error") && jsonObject.get("error").isJsonObject()) {
+                JsonObject errorObject = jsonObject.getAsJsonObject("error");
+                String errorMessage = errorObject.has("message") && !errorObject.get("message").isJsonNull()
+                        ? errorObject.get("message").getAsString()
+                        : "Unknown speech-to-text error";
+                return new AIModel.ChatResponse(false, errorMessage);
+            }
+            throw new NeoAIException("Speech-to-text response missing text field");
+        }
+        catch (JsonSyntaxException ex) {
+            throw new NeoAIException("Invalid JSON when extracting speech-to-text response", ex);
+        }
     }
 
     private AIModel.ChatResponse extractChatResponseFromJson(String jsonResponse) throws Exception {
-        AIModel.ChatResponse chatResponse = null;
-        JsonElement element = JsonParser.parseString(jsonResponse);
-        JsonObject jsonObject = element.getAsJsonObject();
-        if(jsonObject.has("choices")) {
-            JsonArray choicesArray = jsonObject.getAsJsonArray("choices");
-            JsonObject firstChoice = choicesArray.get(0).getAsJsonObject();
-            JsonObject messageObject = firstChoice.getAsJsonObject("message");
-            String content = "";
-            if(messageObject.get("content") != null 
-                && !messageObject.get("content").isJsonNull()) {
-                content = messageObject.get("content").getAsString();
+        try {
+            JsonElement element = JsonParser.parseString(jsonResponse);
+            if (!element.isJsonObject()) {
+                throw new NeoAIException("Chat response is not a JSON object");
+            }
+            JsonObject jsonObject = element.getAsJsonObject();
+            if (jsonObject.has("choices") && jsonObject.get("choices").isJsonArray()) {
+                JsonArray choicesArray = jsonObject.getAsJsonArray("choices");
+                for (int i = 0; i < choicesArray.size(); i++) {
+                    JsonObject choiceObject = choicesArray.get(i).isJsonObject() ? choicesArray.get(i).getAsJsonObject() : null;
+                    if (choiceObject == null) {
+                        continue;
+                    }
+
+                    String content = null;
+                    if (choiceObject.has("message") && choiceObject.get("message").isJsonObject()) {
+                        JsonObject messageObject = choiceObject.getAsJsonObject("message");
+                        if (messageObject.has("content") && !messageObject.get("content").isJsonNull()) {
+                            content = messageObject.get("content").getAsString();
+                        }
+                    }
+                    else if (choiceObject.has("delta") && choiceObject.get("delta").isJsonObject()) {
+                        JsonObject deltaObject = choiceObject.getAsJsonObject("delta");
+                        if (deltaObject.has("content") && !deltaObject.get("content").isJsonNull()) {
+                            content = deltaObject.get("content").getAsString();
+                        }
+                    }
+
+                    if (content != null) {
+                        return new AIModel.ChatResponse(true, content);
+                    }
+                }
+
+                return new AIModel.ChatResponse(true, "");
             }
 
-            chatResponse = new AIModel.ChatResponse(true, content);
-        }
-        else {
-            String errorMessage = jsonObject.getAsJsonObject("error").get("message").getAsString();
+            if (jsonObject.has("error") && jsonObject.get("error").isJsonObject()) {
+                JsonObject errorObject = jsonObject.getAsJsonObject("error");
+                String errorMessage = errorObject.has("message") && !errorObject.get("message").isJsonNull()
+                        ? errorObject.get("message").getAsString()
+                        : "Unknown chat completion error";
+                return new AIModel.ChatResponse(false, errorMessage);
+            }
 
-            chatResponse = new AIModel.ChatResponse(false, errorMessage);
+            throw new NeoAIException("Chat response missing choices and error payload");
         }
-        return chatResponse; 
+        catch (JsonSyntaxException ex) {
+            throw new NeoAIException("Invalid JSON when extracting chat response", ex);
+        }
     }
 
     private JsonArray generateJsonArrayTools(FunctionCallIFC functionCall) {
