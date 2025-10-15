@@ -18,10 +18,10 @@ import org.neo.servaaibase.impl.*;
 import org.neo.servaaibase.model.*;
 
 /**
- * Unit tests (JUnit 5 / Java 21) for GoogleAIImpl integration.
- * Logic is kept the same as the original JUnit 3 tests.
+ * Unit tests (JUnit 5 / Java 21) for GoogleImpl integration.
+ * Logic mirrors the OpenAI suite for parity.
  */
-public class GoogleAIImplTest {
+public class GoogleImplTest {
 
     @BeforeEach
     void setUp() throws Exception {
@@ -38,9 +38,8 @@ public class GoogleAIImplTest {
         return (String[]) dbService.executeQueryTask(new DBQueryTaskIFC() {
             @Override
             public Object query(DBConnectionIFC dbConnection) {
-                GoogleAIImpl googleAI = GoogleAIImpl.getInstance(dbConnection);
-                String[] models = googleAI.getChatModels();
-                return models;
+                GoogleImpl google = GoogleImpl.getInstance(dbConnection);
+                return google.getChatModels();
             }
         });
     }
@@ -50,21 +49,21 @@ public class GoogleAIImplTest {
         dbService.executeQueryTask(new DBQueryTaskIFC() {
             @Override
             public Object query(DBConnectionIFC dbConnection) {
-                GoogleAIImpl googleAI = GoogleAIImpl.getInstance(dbConnection);
+                GoogleImpl google = GoogleImpl.getInstance(dbConnection);
 
-                String[] models = googleAI.getChatModels();
+                String[] models = google.getChatModels();
                 for (String model : models) {
-                    printChat(model, userInput, googleAI);
+                    printChat(model, userInput, google);
                 }
                 return null;
             }
 
-            private void printChat(String model, String userInput, GoogleAIImpl googleAI) {
+            private void printChat(String model, String userInput, GoogleImpl google) {
                 System.out.println("test fetchChatResponse on model [" + model + "]");
                 System.out.println("userInput = " + userInput);
                 AIModel.PromptStruct promptStruct = new AIModel.PromptStruct();
                 promptStruct.setUserInput(userInput);
-                AIModel.ChatResponse chatResponse = googleAI.fetchChatResponse(model, promptStruct);
+                AIModel.ChatResponse chatResponse = google.fetchChatResponse(model, promptStruct);
                 System.out.println("response = " + chatResponse.getMessage());
             }
         });
@@ -80,12 +79,12 @@ public class GoogleAIImplTest {
         return (AIModel.Embedding) dbService.executeQueryTask(new DBQueryTaskIFC() {
             @Override
             public Object query(DBConnectionIFC dbConnection) {
-                GoogleAIImpl googleAI = GoogleAIImpl.getInstance(dbConnection);
-                String[] models = googleAI.getEmbeddingModels();
+                GoogleImpl google = GoogleImpl.getInstance(dbConnection);
+                String[] models = google.getEmbeddingModels();
                 for (String model : models) {
                     System.out.println("test getEmbedding on model [" + model + "]");
                     System.out.println("userInput = " + userInput);
-                    AIModel.Embedding embedding = googleAI.getEmbedding(model, userInput);
+                    AIModel.Embedding embedding = google.getEmbedding(model, userInput);
                     System.out.println("embedding.size = " + embedding.size());
                     System.out.println("embedding = " + embedding.toString());
                 }
@@ -99,16 +98,18 @@ public class GoogleAIImplTest {
         return (String[]) dbService.executeQueryTask(new DBQueryTaskIFC() {
             @Override
             public Object query(DBConnectionIFC dbConnection) {
-                GoogleAIImpl googleAI = GoogleAIImpl.getInstance(dbConnection);
-                String[] models = googleAI.getImageModels();
+                GoogleImpl google = GoogleImpl.getInstance(dbConnection);
+                String[] models = google.getImageModels();
                 for (String model : models) {
                     System.out.println("test generateImages on model [" + model + "]");
                     System.out.println("userInput = " + userInput);
                     AIModel.ImagePrompt imagePrompt = new AIModel.ImagePrompt();
                     imagePrompt.setUserInput(userInput);
-                    String[] urls = googleAI.generateImages(models[0], imagePrompt);
-                    for (String url : urls) {
-                        System.out.println("url = " + url);
+                    String[] urls = google.generateImages(model, imagePrompt);
+                    if (urls != null) {
+                        for (String url : urls) {
+                            System.out.println("url = " + url);
+                        }
                     }
                 }
                 return null;
@@ -143,12 +144,12 @@ public class GoogleAIImplTest {
             dbService.executeQueryTask(new DBQueryTaskIFC() {
                 @Override
                 public Object query(DBConnectionIFC dbConnection) {
-                    GoogleAIImpl googleAI = GoogleAIImpl.getInstance(dbConnection);
+                    GoogleImpl google = GoogleImpl.getInstance(dbConnection);
                     String userInput1 = "Hello, how are you! I'm Neo, nice to meet you!";
                     String userInput2 = "这是一段语言测试";
                     String[] userInputs = new String[]{userInput1, userInput2};
                     String systemHint = "You are a great language expert, you never response user prompt with your own idea, what you need to do is just translating input prompt, in case the input is English, you translate it into Chinese, in case the input is Chinese, you translate it into English";
-                    String[] models = googleAI.getChatModels();
+                    String[] models = google.getChatModels();
                     for (String model : models) {
                         System.out.println("test fetchChatResponse with model [" + model + "]");
                         for (String userInput : userInputs) {
@@ -156,7 +157,7 @@ public class GoogleAIImplTest {
                             AIModel.PromptStruct promptStruct = new AIModel.PromptStruct();
                             promptStruct.setUserInput(userInput);
                             promptStruct.setSystemHint(systemHint);
-                            AIModel.ChatResponse chatResponse = googleAI.fetchChatResponse(model, promptStruct);
+                            AIModel.ChatResponse chatResponse = google.fetchChatResponse(model, promptStruct);
                             System.out.println("response = " + chatResponse.getMessage());
                         }
                     }
@@ -171,7 +172,7 @@ public class GoogleAIImplTest {
 
     void _testVisionImage() throws Exception {
         try {
-            String userInput = "Hello, please give me an description of the images";
+            String userInput = "Hello, please give me a description of the images";
             visionImage(userInput);
         } catch (Exception ex) {
             System.out.println("ex.message = " + ex.getMessage());
@@ -201,9 +202,8 @@ public class GoogleAIImplTest {
     }
 }
 
-// Package-private class preserved
 class GoogleVisionImageTask implements DBQueryTaskIFC {
-    private String userInput;
+    private final String userInput;
 
     public GoogleVisionImageTask(String inputUserInput) {
         userInput = inputUserInput;
@@ -219,8 +219,8 @@ class GoogleVisionImageTask implements DBQueryTaskIFC {
     }
 
     private Object innerQuery(DBConnectionIFC dbConnection) throws Exception {
-        GoogleAIImpl googleAI = GoogleAIImpl.getInstance(dbConnection);
-        String[] models = googleAI.getVisionModels();
+        GoogleImpl google = GoogleImpl.getInstance(dbConnection);
+        String[] models = google.getVisionModels();
         for (String model : models) {
             System.out.println("test vision on model [" + model + "]");
             System.out.println("userInput = " + userInput);
@@ -228,10 +228,11 @@ class GoogleVisionImageTask implements DBQueryTaskIFC {
             promptStruct.setUserInput(userInput);
 
             AIModel.Attachment attachment1 = new AIModel.Attachment();
-            InputStream in1 = new FileInputStream("/tmp/dogandcat.png");
-            String rawBase64OfAttach1 = IOUtil.inputStreamToRawBase64(in1);
-            String base64 = "data:image/png;base64," + rawBase64OfAttach1;
-            attachment1.setContent(base64);
+            try (InputStream in1 = new FileInputStream("/tmp/dogandcat.png")) {
+                String rawBase64OfAttach1 = IOUtil.inputStreamToRawBase64(in1);
+                String base64 = "data:image/png;base64," + rawBase64OfAttach1;
+                attachment1.setContent(base64);
+            }
 
             List<AIModel.Attachment> attachments = new ArrayList<AIModel.Attachment>();
             attachments.add(attachment1);
@@ -241,7 +242,7 @@ class GoogleVisionImageTask implements DBQueryTaskIFC {
 
             promptStruct.setAttachmentGroup(attachmentGroup);
 
-            AIModel.ChatResponse chatResponse = googleAI.fetchChatResponse(model, promptStruct);
+            AIModel.ChatResponse chatResponse = google.fetchChatResponse(model, promptStruct);
             System.out.println("response = " + chatResponse.getMessage());
         }
         return null;

@@ -4,7 +4,7 @@ import org.neo.servaframe.interfaces.DBConnectionIFC;
 
 import org.neo.servaaibase.ifc.SuperAIIFC;
 import org.neo.servaaibase.impl.OpenAIImpl;
-import org.neo.servaaibase.impl.GoogleAIImpl;
+import org.neo.servaaibase.impl.GoogleImpl;
 import org.neo.servaaibase.util.CommonUtil;
 
 public class AIFactory {
@@ -13,8 +13,8 @@ public class AIFactory {
         if(aiInstance.equals("OpenAIImpl")) {
             return OpenAIImpl.getInstance();
         }
-        else if(aiInstance.equals("GoogleAIImpl")) {
-            return GoogleAIImpl.getInstance();
+        else if(aiInstance.equals("GoogleImpl")) {
+            return GoogleImpl.getInstance();
         }
         return null;
     }
@@ -24,8 +24,8 @@ public class AIFactory {
         if(aiInstance.equals("OpenAIImpl")) {
             return OpenAIImpl.getInstance(dbConnection);
         }
-        else if(aiInstance.equals("GoogleAIImpl")) {
-            return GoogleAIImpl.getInstance(dbConnection);
+        else if(aiInstance.equals("GoogleImpl")) {
+            return GoogleImpl.getInstance(dbConnection);
         }
         return null;
     }
