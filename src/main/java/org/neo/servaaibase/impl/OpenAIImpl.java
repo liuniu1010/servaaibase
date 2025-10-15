@@ -111,7 +111,7 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         contextWindowMapping.put(gpt_5, 400000);
         contextWindowMapping.put(gpt_5_mini, 400000);
         contextWindowMapping.put(gpt_5_nano, 400000);
-        contextWindowMapping.put(gpt_5_chat, 400000);
+        contextWindowMapping.put(gpt_5_chat, 128000);
         contextWindowMapping.put(gpt_oss_120b, 131072);
         contextWindowMapping.put(gpt_oss_20b, 131072);
         contextWindowMapping.put(gpt_41, 1047576);
@@ -131,7 +131,7 @@ public class OpenAIImpl extends AbsOpenAIImpl {
         maxOutputMapping.put(gpt_5, 128000);
         maxOutputMapping.put(gpt_5_mini, 128000);
         maxOutputMapping.put(gpt_5_nano, 128000);
-        maxOutputMapping.put(gpt_5_chat, 128000);
+        maxOutputMapping.put(gpt_5_chat, 16384);
         maxOutputMapping.put(gpt_oss_120b, 131072);
         maxOutputMapping.put(gpt_oss_20b, 131072);
         maxOutputMapping.put(gpt_41, 32768);

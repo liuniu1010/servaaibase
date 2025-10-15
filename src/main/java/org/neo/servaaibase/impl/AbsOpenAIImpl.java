@@ -678,28 +678,63 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
 
     private JsonArray generateJsonArrayTools(FunctionCallIFC functionCall) {
         JsonArray tools = new JsonArray();
+        if (functionCall == null) {
+            return tools;
+        }
 
         List<AIModel.Function> functions = functionCall.getFunctions();
-        for(AIModel.Function function: functions) {
+        if (functions == null || functions.isEmpty()) {
+            return tools;
+        }
+
+        for (AIModel.Function function : functions) {
+            if (function == null) {
+                continue;
+            }
+
+            String methodName = function.getMethodName();
+            if (methodName == null || methodName.isEmpty()) {
+                continue;
+            }
+
             JsonObject jsonFunction = new JsonObject();
-            jsonFunction.addProperty("name", function.getMethodName());
-            jsonFunction.addProperty("description", function.getDescription());
+            jsonFunction.addProperty("name", methodName);
+            if (function.getDescription() != null && !function.getDescription().isEmpty()) {
+                jsonFunction.addProperty("description", function.getDescription());
+            }
 
             JsonObject jsonParameters = new JsonObject();
             jsonParameters.addProperty("type", "object");
-            List<AIModel.FunctionParam> functionParams = function.getParams();
+
             JsonObject jsonProperties = new JsonObject();
             JsonArray jsonRequiredParams = new JsonArray();
-            for(AIModel.FunctionParam functionParam: functionParams) {
-                JsonObject jsonParam = new JsonObject();
-                jsonParam.addProperty("type", "string");
-                jsonParam.addProperty("description", functionParam.getDescription());
+            List<AIModel.FunctionParam> functionParams = function.getParams();
+            if (functionParams != null) {
+                for (AIModel.FunctionParam functionParam : functionParams) {
+                    if (functionParam == null) {
+                        continue;
+                    }
 
-                jsonProperties.add(functionParam.getName(), jsonParam);
-                jsonRequiredParams.add(functionParam.getName()); 
+                    String paramName = functionParam.getName();
+                    if (paramName == null || paramName.isEmpty()) {
+                        continue;
+                    }
+
+                    JsonObject jsonParam = new JsonObject();
+                    jsonParam.addProperty("type", "string");
+                    if (functionParam.getDescription() != null && !functionParam.getDescription().isEmpty()) {
+                        jsonParam.addProperty("description", functionParam.getDescription());
+                    }
+
+                    jsonProperties.add(paramName, jsonParam);
+                    jsonRequiredParams.add(paramName);
+                }
             }
+
             jsonParameters.add("properties", jsonProperties);
-            jsonParameters.add("required", jsonRequiredParams);
+            if (jsonRequiredParams.size() > 0) {
+                jsonParameters.add("required", jsonRequiredParams);
+            }
             jsonFunction.add("parameters", jsonParameters);
 
             JsonObject jsonTool = new JsonObject();
@@ -725,60 +760,65 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
     private JsonArray generateJsonArrayMessages(String model, AIModel.PromptStruct promptStruct) {
         JsonArray messages = new JsonArray();
         String systemHint = getDefaultSystemHint();
-        if(promptStruct.getSystemHint() != null
-            && !promptStruct.getSystemHint().isEmpty()) {
-            systemHint = promptStruct.getSystemHint();  // caller has set system hint, use it
+        if (promptStruct != null && promptStruct.getSystemHint() != null && !promptStruct.getSystemHint().isEmpty()) {
+            systemHint = promptStruct.getSystemHint();
         }
 
         JsonObject systemMessage = new JsonObject();
-        if(isSupportSystemHint(model)) {
-            systemMessage.addProperty("role", "system");
-        }
-        else {
-            systemMessage.addProperty("role", "user");
-        }
-        systemMessage.addProperty("content", systemHint);
+        systemMessage.addProperty("role", isSupportSystemHint(model) ? "system" : "user");
+        systemMessage.addProperty("content", systemHint == null ? "" : systemHint);
         messages.add(systemMessage);
 
-        List<AIModel.ChatRecord> chatRecords = promptStruct.getChatRecords();
-        for(AIModel.ChatRecord chatRecord: chatRecords) {
-            JsonObject recordMessage = new JsonObject();
-            recordMessage.addProperty("role", chatRecord.getIsRequest()?"user":"assistant");
-            recordMessage.addProperty("content", chatRecord.getContent());
-            messages.add(recordMessage);
+        List<AIModel.ChatRecord> chatRecords = promptStruct != null ? promptStruct.getChatRecords() : null;
+        if (chatRecords != null) {
+            for (AIModel.ChatRecord chatRecord : chatRecords) {
+                if (chatRecord == null) {
+                    continue;
+                }
+
+                JsonObject recordMessage = new JsonObject();
+                recordMessage.addProperty("role", chatRecord.getIsRequest() ? "user" : "assistant");
+                String content = chatRecord.getContent();
+                recordMessage.addProperty("content", content == null ? "" : content);
+                messages.add(recordMessage);
+            }
         }
 
         JsonObject userInputMessage = new JsonObject();
         userInputMessage.addProperty("role", "user");
-        if(isVisionModel(model)) {
+        String userInput = promptStruct != null ? promptStruct.getUserInput() : null;
+        if (isVisionModel(model)) {
             JsonArray jsonContentArray = new JsonArray();
 
             JsonObject jsonTextContent = new JsonObject();
             jsonTextContent.addProperty("type", "text");
-            jsonTextContent.addProperty("text", promptStruct.getUserInput());
-
+            jsonTextContent.addProperty("text", userInput == null ? "" : userInput);
             jsonContentArray.add(jsonTextContent);
 
-            AIModel.AttachmentGroup attachmentGroup = promptStruct.getAttachmentGroup();
-            if(attachmentGroup != null
-                && attachmentGroup.getAttachments() != null) {
-                List<AIModel.Attachment> attachments = attachmentGroup.getAttachments();
-                for(AIModel.Attachment attachment: attachments) {
-                    JsonObject jsonUrl = new JsonObject();
-                    jsonUrl.addProperty("url", attachment.getContent());
+            if (promptStruct != null) {
+                AIModel.AttachmentGroup attachmentGroup = promptStruct.getAttachmentGroup();
+                if (attachmentGroup != null && attachmentGroup.getAttachments() != null) {
+                    for (AIModel.Attachment attachment : attachmentGroup.getAttachments()) {
+                        if (attachment == null || attachment.getContent() == null || attachment.getContent().isEmpty()) {
+                            continue;
+                        }
 
-                    JsonObject jsonImage = new JsonObject();
-                    jsonImage.addProperty("type", "image_url");
-                    jsonImage.add("image_url", jsonUrl);
+                        JsonObject jsonUrl = new JsonObject();
+                        jsonUrl.addProperty("url", attachment.getContent());
 
-                    jsonContentArray.add(jsonImage);
+                        JsonObject jsonImage = new JsonObject();
+                        jsonImage.addProperty("type", "image_url");
+                        jsonImage.add("image_url", jsonUrl);
+
+                        jsonContentArray.add(jsonImage);
+                    }
                 }
             }
 
             userInputMessage.add("content", jsonContentArray);
         }
-        else { // is chat model
-            userInputMessage.addProperty("content", promptStruct.getUserInput());
+        else {
+            userInputMessage.addProperty("content", userInput == null ? "" : userInput);
         }
         messages.add(userInputMessage);
 
@@ -793,14 +833,15 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         jsonBody.addProperty("max_tokens", 1);
         jsonBody.addProperty("temperature", 0);
         jsonBody.addProperty("n", 1);
-        jsonBody.addProperty("stop", "");
 
         JsonArray messages = generateJsonArrayMessages(model, promptStruct);
         jsonBody.add("messages", messages);
 
-        if(promptStruct.getFunctionCall() != null) {
+        if (promptStruct != null && promptStruct.getFunctionCall() != null) {
             JsonArray tools = generateJsonArrayTools(promptStruct.getFunctionCall());
-            jsonBody.add("tools", tools);
+            if (tools.size() > 0) {
+                jsonBody.add("tools", tools);
+            }
         }
         return gson.toJson(jsonBody);
     }
@@ -813,9 +854,15 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         JsonArray messages = generateJsonArrayMessages(model, promptStruct);
         jsonBody.add("messages", messages);
 
-        if(promptStruct.getFunctionCall() != null) {
+        if (maxTokens > 0) {
+            jsonBody.addProperty("max_completion_tokens", maxTokens);
+        }
+
+        if (promptStruct != null && promptStruct.getFunctionCall() != null) {
             JsonArray tools = generateJsonArrayTools(promptStruct.getFunctionCall());
-            jsonBody.add("tools", tools);
+            if (tools.size() > 0) {
+                jsonBody.add("tools", tools);
+            }
         }
         return gson.toJson(jsonBody);
     }
@@ -825,8 +872,8 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         JsonObject jsonBody = new JsonObject();
 
         jsonBody.addProperty("model", model);
-        jsonBody.addProperty("input", input);
-        if(dimensions > 0) {
+        jsonBody.addProperty("input", input == null ? "" : input);
+        if (dimensions > 0) {
             jsonBody.addProperty("dimensions", dimensions);
         }
 
@@ -837,10 +884,18 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         Gson gson = new Gson();
         JsonObject jsonBody = new JsonObject();
 
+        String prompt = imagePrompt != null ? imagePrompt.getUserInput() : null;
+        String size = imagePrompt != null ? imagePrompt.getSize() : null;
+        int number = imagePrompt != null ? imagePrompt.getNumber() : 0;
+
         jsonBody.addProperty("model", model);
-        jsonBody.addProperty("prompt", imagePrompt.getUserInput());
-        jsonBody.addProperty("size", imagePrompt.getSize());
-        jsonBody.addProperty("n", imagePrompt.getNumber());
+        jsonBody.addProperty("prompt", prompt == null ? "" : prompt);
+        if (size != null && !size.isEmpty()) {
+            jsonBody.addProperty("size", size);
+        }
+        if (number > 0) {
+            jsonBody.addProperty("n", number);
+        }
 
         return gson.toJson(jsonBody);
     }
@@ -849,10 +904,18 @@ abstract public class AbsOpenAIImpl implements SuperAIIFC {
         Gson gson = new Gson();
         JsonObject jsonBody = new JsonObject();
 
+        String input = textToSpeechPrompt != null ? textToSpeechPrompt.getUserInput() : null;
+        String voice = textToSpeechPrompt != null ? textToSpeechPrompt.getVoice() : null;
+        String outputFormat = textToSpeechPrompt != null ? textToSpeechPrompt.getOutputFormat() : null;
+
         jsonBody.addProperty("model", model);
-        jsonBody.addProperty("input", textToSpeechPrompt.getUserInput());
-        jsonBody.addProperty("voice", textToSpeechPrompt.getVoice());
-        jsonBody.addProperty("output_format", textToSpeechPrompt.getOutputFormat());
+        jsonBody.addProperty("input", input == null ? "" : input);
+        if (voice != null && !voice.isEmpty()) {
+            jsonBody.addProperty("voice", voice);
+        }
+        if (outputFormat != null && !outputFormat.isEmpty()) {
+            jsonBody.addProperty("output_format", outputFormat);
+        }
 
         return gson.toJson(jsonBody);
     }
