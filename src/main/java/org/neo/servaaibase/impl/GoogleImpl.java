@@ -28,8 +28,14 @@ public class GoogleImpl extends AbsGoogleImpl {
         return new GoogleImpl(inputDBConnection);
     }
 
-    public static String gemini_20_flash = "gemini-2.0-flash-exp";
-    public static String gemini_20_pro = "gemini-2.0-pro-exp";
+    public static String gemini_25_pro = "gemini-2.5-pro";
+    public static String gemini_25_flash = "gemini-2.5-flash";
+    public static String gemini_25_flash_lite = "gemini-2.5-flash-lite";
+    public static String gemini_20_flash = "gemini-2.0-flash";
+    public static String gemini_20_flash_lite = "gemini-2.0-flash-lite";
+
+    // public static String gemini_20_flash = "gemini-2.0-flash-exp";
+    // public static String gemini_20_pro = "gemini-2.0-pro-exp";
     public static String gemini_15_pro = "gemini-1.5-pro-latest";
     public static String gemini_15_flash = "gemini-1.5-flash-latest";
     public static String gemini_15_flash_8b = "gemini-1.5-flash-8b-latest";
@@ -55,16 +61,23 @@ public class GoogleImpl extends AbsGoogleImpl {
     private Map<String, Boolean> supportSystemMapping;
 
     private void setup() {
-        chatModels = new String[]{gemini_20_flash, gemini_20_pro, gemini_15_pro, gemini_15_flash, gemini_15_flash_8b, gemini_10_pro, gemini_10_vision};
+        chatModels = new String[]{gemini_25_pro, gemini_25_flash, gemini_25_flash_lite, gemini_20_flash, gemini_20_flash_lite};
+
         embeddingModels = new String[]{text_embedding_004};
         imageModels = new String[]{imagen_30, imagen_30_lite};
-        visionModels = new String[]{gemini_20_flash, gemini_20_pro, gemini_15_pro, gemini_15_flash, gemini_10_vision};
+        visionModels = new String[]{gemini_20_flash, /*gemini_20_pro,*/ gemini_15_pro, gemini_15_flash, gemini_10_vision};
         textToSpeechModels = new String[]{tts_neural, tts_standard};
         speechToTextModels = new String[]{speech_standard};
 
         urlMapping = new ConcurrentHashMap<String, String>();
+        urlMapping.put(gemini_25_pro, buildGenerateContentUrl(gemini_25_pro));
+        urlMapping.put(gemini_25_flash, buildGenerateContentUrl(gemini_25_flash));
+        urlMapping.put(gemini_25_flash_lite, buildGenerateContentUrl(gemini_25_flash_lite));
         urlMapping.put(gemini_20_flash, buildGenerateContentUrl(gemini_20_flash));
-        urlMapping.put(gemini_20_pro, buildGenerateContentUrl(gemini_20_pro));
+        urlMapping.put(gemini_20_flash_lite, buildGenerateContentUrl(gemini_20_flash_lite));
+
+        //urlMapping.put(gemini_20_flash, buildGenerateContentUrl(gemini_20_flash));
+        // urlMapping.put(gemini_20_pro, buildGenerateContentUrl(gemini_20_pro));
         urlMapping.put(gemini_15_pro, buildGenerateContentUrl(gemini_15_pro));
         urlMapping.put(gemini_15_flash, buildGenerateContentUrl(gemini_15_flash));
         urlMapping.put(gemini_15_flash_8b, buildGenerateContentUrl(gemini_15_flash_8b));
@@ -78,8 +91,13 @@ public class GoogleImpl extends AbsGoogleImpl {
         urlMapping.put(speech_standard, "https://speech.googleapis.com/v1/speech:recognize");
 
         contextWindowMapping = new ConcurrentHashMap<String, Integer>();
-        contextWindowMapping.put(gemini_20_flash, 1000000);
-        contextWindowMapping.put(gemini_20_pro, 2000000);
+        contextWindowMapping.put(gemini_25_pro, 1048576);
+        contextWindowMapping.put(gemini_25_flash, 1048576);
+        contextWindowMapping.put(gemini_25_flash_lite, 1048576);
+        contextWindowMapping.put(gemini_20_flash, 1048576);
+        contextWindowMapping.put(gemini_20_flash_lite, 1048576);
+
+        // contextWindowMapping.put(gemini_20_flash, 1000000);
         contextWindowMapping.put(gemini_15_pro, 2000000);
         contextWindowMapping.put(gemini_15_flash, 1000000);
         contextWindowMapping.put(gemini_15_flash_8b, 1000000);
@@ -87,8 +105,13 @@ public class GoogleImpl extends AbsGoogleImpl {
         contextWindowMapping.put(gemini_10_vision, 32000);
 
         maxOutputMapping = new ConcurrentHashMap<String, Integer>();
+        maxOutputMapping.put(gemini_25_pro, 65536);
+        maxOutputMapping.put(gemini_25_flash, 65536);
+        maxOutputMapping.put(gemini_25_flash_lite, 65536);
         maxOutputMapping.put(gemini_20_flash, 8192);
-        maxOutputMapping.put(gemini_20_pro, 8192);
+        maxOutputMapping.put(gemini_20_flash_lite, 8192);
+
+        // maxOutputMapping.put(gemini_20_flash, 8192);
         maxOutputMapping.put(gemini_15_pro, 8192);
         maxOutputMapping.put(gemini_15_flash, 8192);
         maxOutputMapping.put(gemini_15_flash_8b, 8192);
@@ -96,8 +119,13 @@ public class GoogleImpl extends AbsGoogleImpl {
         maxOutputMapping.put(gemini_10_vision, 4096);
 
         supportSystemMapping = new ConcurrentHashMap<String, Boolean>();
+        supportSystemMapping.put(gemini_25_pro, true);
+        supportSystemMapping.put(gemini_25_flash, true);
+        supportSystemMapping.put(gemini_25_flash_lite, true);
         supportSystemMapping.put(gemini_20_flash, true);
-        supportSystemMapping.put(gemini_20_pro, true);
+        supportSystemMapping.put(gemini_20_flash_lite, true);
+
+        // supportSystemMapping.put(gemini_20_flash, true);
         supportSystemMapping.put(gemini_15_pro, true);
         supportSystemMapping.put(gemini_15_flash, true);
         supportSystemMapping.put(gemini_15_flash_8b, true);

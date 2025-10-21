@@ -117,8 +117,8 @@ public class GoogleImplTest {
         });
     }
 
-    // Methods starting with "_" were not run in JUnit 3; keep them as helpers (no @Test)
-    void _testGetChatModels() {
+    @Test
+    void testGetChatModels() {
         String[] models = getChatModels();
         System.out.println("models.size = " + models.length);
         for (String model : models) {
@@ -170,7 +170,8 @@ public class GoogleImplTest {
         }
     }
 
-    void _testVisionImage() throws Exception {
+    @Test
+    void testVisionImage() throws Exception {
         try {
             String userInput = "Hello, please give me a description of the images";
             visionImage(userInput);
@@ -191,7 +192,8 @@ public class GoogleImplTest {
         }
     }
 
-    void _testGenerateImage() throws Exception {
+    @Test
+    void testGenerateImage() throws Exception {
         try {
             String userInput = "Blue sky outside the window, with white clouds and blue sea";
             generateImages(userInput);
