@@ -230,11 +230,9 @@ class GoogleVisionImageTask implements DBQueryTaskIFC {
             promptStruct.setUserInput(userInput);
 
             AIModel.Attachment attachment1 = new AIModel.Attachment();
-            try (InputStream in1 = new FileInputStream("/tmp/dogandcat.png")) {
-                String rawBase64OfAttach1 = IOUtil.inputStreamToRawBase64(in1);
-                String base64 = "data:image/png;base64," + rawBase64OfAttach1;
-                attachment1.setContent(base64);
-            }
+            String rawBase64 = IOUtil.resourceFileToRawBase64("dogandcat.png");
+            String base64 = "data:image/png;base64," + rawBase64;
+            attachment1.setContent(base64);
 
             List<AIModel.Attachment> attachments = new ArrayList<AIModel.Attachment>();
             attachments.add(attachment1);

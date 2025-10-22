@@ -30,9 +30,13 @@ public class GoogleImpl extends AbsGoogleImpl {
 
     public static String gemini_25_pro = "gemini-2.5-pro";
     public static String gemini_25_flash = "gemini-2.5-flash";
+    public static String gemini_25_flash_image = "gemini-2.5-flash-image";
     public static String gemini_25_flash_lite = "gemini-2.5-flash-lite";
     public static String gemini_20_flash = "gemini-2.0-flash";
     public static String gemini_20_flash_lite = "gemini-2.0-flash-lite";
+    public static String text_embedding_004 = "text-embedding-004";
+    public static String gemini_embedding_001 = "gemini-embedding-001";
+    public static String imagen_40_generate_001 = "imagen-4.0-generate-001";
 
     // public static String gemini_20_flash = "gemini-2.0-flash-exp";
     // public static String gemini_20_pro = "gemini-2.0-pro-exp";
@@ -41,7 +45,6 @@ public class GoogleImpl extends AbsGoogleImpl {
     public static String gemini_15_flash_8b = "gemini-1.5-flash-8b-latest";
     public static String gemini_10_pro = "gemini-1.0-pro";
     public static String gemini_10_vision = "gemini-1.0-pro-vision";
-    public static String text_embedding_004 = "text-embedding-004";
     public static String imagen_30 = "imagen-3.0-generate";
     public static String imagen_30_lite = "imagen-3.0-lite";
     public static String tts_standard = "google-tts-standard";
@@ -62,19 +65,21 @@ public class GoogleImpl extends AbsGoogleImpl {
 
     private void setup() {
         chatModels = new String[]{gemini_25_pro, gemini_25_flash, gemini_25_flash_lite, gemini_20_flash, gemini_20_flash_lite};
-
-        embeddingModels = new String[]{text_embedding_004};
-        imageModels = new String[]{imagen_30, imagen_30_lite};
-        visionModels = new String[]{gemini_20_flash, /*gemini_20_pro,*/ gemini_15_pro, gemini_15_flash, gemini_10_vision};
+        visionModels = new String[]{gemini_25_pro, gemini_25_flash, gemini_25_flash_image, gemini_25_flash_lite, gemini_20_flash, gemini_20_flash_lite};
+        embeddingModels = new String[]{gemini_embedding_001, text_embedding_004};
+        imageModels = new String[]{imagen_40_generate_001};
         textToSpeechModels = new String[]{tts_neural, tts_standard};
         speechToTextModels = new String[]{speech_standard};
 
         urlMapping = new ConcurrentHashMap<String, String>();
         urlMapping.put(gemini_25_pro, buildGenerateContentUrl(gemini_25_pro));
         urlMapping.put(gemini_25_flash, buildGenerateContentUrl(gemini_25_flash));
+        urlMapping.put(gemini_25_flash_image, buildGenerateContentUrl(gemini_25_flash_image));
         urlMapping.put(gemini_25_flash_lite, buildGenerateContentUrl(gemini_25_flash_lite));
         urlMapping.put(gemini_20_flash, buildGenerateContentUrl(gemini_20_flash));
         urlMapping.put(gemini_20_flash_lite, buildGenerateContentUrl(gemini_20_flash_lite));
+        urlMapping.put(gemini_embedding_001, buildEmbedContentUrl(gemini_embedding_001));
+        urlMapping.put(text_embedding_004, buildEmbedContentUrl(text_embedding_004));
 
         //urlMapping.put(gemini_20_flash, buildGenerateContentUrl(gemini_20_flash));
         // urlMapping.put(gemini_20_pro, buildGenerateContentUrl(gemini_20_pro));
@@ -83,8 +88,7 @@ public class GoogleImpl extends AbsGoogleImpl {
         urlMapping.put(gemini_15_flash_8b, buildGenerateContentUrl(gemini_15_flash_8b));
         urlMapping.put(gemini_10_pro, buildGenerateContentUrl(gemini_10_pro));
         urlMapping.put(gemini_10_vision, buildGenerateContentUrl(gemini_10_vision));
-        urlMapping.put(text_embedding_004, buildEmbedContentUrl(text_embedding_004));
-        urlMapping.put(imagen_30, buildGenerateImageUrl(imagen_30));
+        urlMapping.put(imagen_40_generate_001, buildGenerateImageUrl(imagen_40_generate_001));
         urlMapping.put(imagen_30_lite, buildGenerateImageUrl(imagen_30_lite));
         urlMapping.put(tts_neural, "https://texttospeech.googleapis.com/v1/text:synthesize");
         urlMapping.put(tts_standard, "https://texttospeech.googleapis.com/v1/text:synthesize");
@@ -93,6 +97,7 @@ public class GoogleImpl extends AbsGoogleImpl {
         contextWindowMapping = new ConcurrentHashMap<String, Integer>();
         contextWindowMapping.put(gemini_25_pro, 1048576);
         contextWindowMapping.put(gemini_25_flash, 1048576);
+        contextWindowMapping.put(gemini_25_flash_image, 32768);
         contextWindowMapping.put(gemini_25_flash_lite, 1048576);
         contextWindowMapping.put(gemini_20_flash, 1048576);
         contextWindowMapping.put(gemini_20_flash_lite, 1048576);
@@ -107,6 +112,7 @@ public class GoogleImpl extends AbsGoogleImpl {
         maxOutputMapping = new ConcurrentHashMap<String, Integer>();
         maxOutputMapping.put(gemini_25_pro, 65536);
         maxOutputMapping.put(gemini_25_flash, 65536);
+        maxOutputMapping.put(gemini_25_flash_image, 32768);
         maxOutputMapping.put(gemini_25_flash_lite, 65536);
         maxOutputMapping.put(gemini_20_flash, 8192);
         maxOutputMapping.put(gemini_20_flash_lite, 8192);
@@ -121,6 +127,7 @@ public class GoogleImpl extends AbsGoogleImpl {
         supportSystemMapping = new ConcurrentHashMap<String, Boolean>();
         supportSystemMapping.put(gemini_25_pro, true);
         supportSystemMapping.put(gemini_25_flash, true);
+        supportSystemMapping.put(gemini_25_flash_image, true);
         supportSystemMapping.put(gemini_25_flash_lite, true);
         supportSystemMapping.put(gemini_20_flash, true);
         supportSystemMapping.put(gemini_20_flash_lite, true);
