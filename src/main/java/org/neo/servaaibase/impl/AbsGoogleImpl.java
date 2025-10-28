@@ -413,38 +413,47 @@ abstract public class AbsGoogleImpl implements SuperAIIFC {
             }
             JsonObject jsonObject = element.getAsJsonObject();
 
-            JsonArray imagesArray = null;
-            if (jsonObject.has("images") && jsonObject.get("images").isJsonArray()) {
-                imagesArray = jsonObject.getAsJsonArray("images");
-            }
-            else if (jsonObject.has("generatedImages") && jsonObject.get("generatedImages").isJsonArray()) {
-                imagesArray = jsonObject.getAsJsonArray("generatedImages");
-            }
-
-            if (imagesArray == null || imagesArray.size() == 0) {
-                throw new NeoAIException("Image response has no images array");
-            }
-
             List<String> collected = new ArrayList<String>();
-            for (int i = 0; i < imagesArray.size(); i++) {
-                JsonObject imageObject = imagesArray.get(i).isJsonObject() ? imagesArray.get(i).getAsJsonObject() : null;
-                if (imageObject == null) {
-                    continue;
+
+            JsonArray predictionsArray = jsonObject.has("predictions") && jsonObject.get("predictions").isJsonArray()
+                    ? jsonObject.getAsJsonArray("predictions")
+                    : null;
+            if (predictionsArray != null) {
+                for (int i = 0; i < predictionsArray.size(); i++) {
+                    JsonObject predictionObject = predictionsArray.get(i).isJsonObject()
+                            ? predictionsArray.get(i).getAsJsonObject()
+                            : null;
+                    collectImagePayloadFromPrediction(predictionObject, collected);
+                }
+            }
+
+            if (collected.isEmpty()) {
+                JsonArray imagesArray = null;
+                if (jsonObject.has("images") && jsonObject.get("images").isJsonArray()) {
+                    imagesArray = jsonObject.getAsJsonArray("images");
+                }
+                else if (jsonObject.has("generatedImages") && jsonObject.get("generatedImages").isJsonArray()) {
+                    imagesArray = jsonObject.getAsJsonArray("generatedImages");
                 }
 
-                if (imageObject.has("imageUri") && !imageObject.get("imageUri").isJsonNull()) {
-                    collected.add(imageObject.get("imageUri").getAsString());
-                    continue;
-                }
+                if (imagesArray != null) {
+                    for (int i = 0; i < imagesArray.size(); i++) {
+                        JsonObject imageObject = imagesArray.get(i).isJsonObject()
+                                ? imagesArray.get(i).getAsJsonObject()
+                                : null;
+                        if (imageObject == null) {
+                            continue;
+                        }
 
-                if (imageObject.has("inlineData") && imageObject.get("inlineData").isJsonObject()) {
-                    JsonObject inlineData = imageObject.getAsJsonObject("inlineData");
-                    if (inlineData.has("data") && !inlineData.get("data").isJsonNull()) {
-                        String mimeType = inlineData.has("mimeType") && !inlineData.get("mimeType").isJsonNull()
-                                ? inlineData.get("mimeType").getAsString()
-                                : "image/png";
-                        String base64 = inlineData.get("data").getAsString();
-                        collected.add("data:" + mimeType + ";base64," + base64);
+                        if (imageObject.has("imageUri") && !imageObject.get("imageUri").isJsonNull()) {
+                            collected.add(imageObject.get("imageUri").getAsString());
+                            continue;
+                        }
+
+                        if (imageObject.has("inlineData") && imageObject.get("inlineData").isJsonObject()) {
+                            JsonObject inlineData = imageObject.getAsJsonObject("inlineData");
+                            collectInlineImageData(inlineData, "image/png", collected);
+                        }
                     }
                 }
             }
@@ -972,20 +981,27 @@ abstract public class AbsGoogleImpl implements SuperAIIFC {
         JsonObject jsonBody = new JsonObject();
 
         String prompt = imagePrompt != null ? imagePrompt.getUserInput() : null;
-        JsonObject promptObject = new JsonObject();
-        promptObject.addProperty("text", prompt == null ? "" : prompt);
-        jsonBody.add("prompt", promptObject);
+        JsonArray instances = new JsonArray();
+        JsonObject instance = new JsonObject();
+        instance.addProperty("prompt", prompt == null ? "" : prompt);
+        instances.add(instance);
+        jsonBody.add("instances", instances);
 
+        JsonObject parameters = new JsonObject();
         if (imagePrompt != null) {
+            if (imagePrompt.getNumber() > 0) {
+                parameters.addProperty("sampleCount", imagePrompt.getNumber());
+            }
             if (imagePrompt.getSize() != null && !imagePrompt.getSize().isEmpty()) {
                 JsonObject imageDimensions = parseImageDimensions(imagePrompt.getSize());
                 if (imageDimensions != null) {
-                    jsonBody.add("imageDimensions", imageDimensions);
+                    parameters.add("imageDimensions", imageDimensions);
                 }
             }
-            if (imagePrompt.getNumber() > 0) {
-                jsonBody.addProperty("sampleCount", imagePrompt.getNumber());
-            }
+        }
+
+        if (parameters.size() > 0) {
+            jsonBody.add("parameters", parameters);
         }
 
         return gson.toJson(jsonBody);
@@ -1073,6 +1089,107 @@ abstract public class AbsGoogleImpl implements SuperAIIFC {
             logger.warn("Unable to parse image size " + size + ", ignore this setting.", ex);
             return null;
         }
+    }
+
+    private void collectImagePayloadFromPrediction(JsonObject predictionObject, List<String> collected) {
+        if (predictionObject == null) {
+            return;
+        }
+
+        String mimeType = extractMimeType(predictionObject, "image/png");
+
+        extractBase64Strings(predictionObject, mimeType, collected,
+                "bytesBase64Encoded", "base64Data", "base64", "imageBase64");
+
+        if (predictionObject.has("b64Images") && predictionObject.get("b64Images").isJsonArray()) {
+            JsonArray b64Images = predictionObject.getAsJsonArray("b64Images");
+            for (int i = 0; i < b64Images.size(); i++) {
+                if (b64Images.get(i).isJsonNull()) {
+                    continue;
+                }
+                addBase64Image(b64Images.get(i).getAsString(), mimeType, collected);
+            }
+        }
+
+        if (predictionObject.has("image") && !predictionObject.get("image").isJsonNull()) {
+            JsonElement imageElement = predictionObject.get("image");
+            if (imageElement.isJsonPrimitive()) {
+                addBase64Image(imageElement.getAsString(), mimeType, collected);
+            }
+            else if (imageElement.isJsonObject()) {
+                JsonObject imageObject = imageElement.getAsJsonObject();
+                String nestedMimeType = extractMimeType(imageObject, mimeType);
+                extractBase64Strings(imageObject, nestedMimeType, collected,
+                        "bytesBase64Encoded", "base64Data", "base64", "imageBase64", "data");
+                if (imageObject.has("inlineData") && imageObject.get("inlineData").isJsonObject()) {
+                    JsonObject inlineData = imageObject.getAsJsonObject("inlineData");
+                    collectInlineImageData(inlineData, nestedMimeType, collected);
+                }
+            }
+        }
+
+        if (predictionObject.has("images") && predictionObject.get("images").isJsonArray()) {
+            JsonArray nestedImages = predictionObject.getAsJsonArray("images");
+            for (int i = 0; i < nestedImages.size(); i++) {
+                JsonElement item = nestedImages.get(i);
+                if (item.isJsonNull()) {
+                    continue;
+                }
+                if (item.isJsonPrimitive()) {
+                    addBase64Image(item.getAsString(), mimeType, collected);
+                }
+                else if (item.isJsonObject()) {
+                    collectImagePayloadFromPrediction(item.getAsJsonObject(), collected);
+                }
+            }
+        }
+
+        if (predictionObject.has("inlineData") && predictionObject.get("inlineData").isJsonObject()) {
+            JsonObject inlineData = predictionObject.getAsJsonObject("inlineData");
+            collectInlineImageData(inlineData, mimeType, collected);
+        }
+    }
+
+    private void collectInlineImageData(JsonObject inlineData, String defaultMimeType, List<String> collected) {
+        if (inlineData == null) {
+            return;
+        }
+
+        String mimeType = extractMimeType(inlineData, defaultMimeType);
+        if (inlineData.has("data") && !inlineData.get("data").isJsonNull()) {
+            addBase64Image(inlineData.get("data").getAsString(), mimeType, collected);
+        }
+    }
+
+    private void extractBase64Strings(JsonObject source, String mimeType, List<String> collected, String... keys) {
+        if (source == null || keys == null) {
+            return;
+        }
+
+        for (String key : keys) {
+            if (key == null || !source.has(key) || source.get(key).isJsonNull()) {
+                continue;
+            }
+            JsonElement value = source.get(key);
+            if (value.isJsonPrimitive()) {
+                addBase64Image(value.getAsString(), mimeType, collected);
+            }
+        }
+    }
+
+    private String extractMimeType(JsonObject source, String defaultMimeType) {
+        if (source != null && source.has("mimeType") && !source.get("mimeType").isJsonNull()) {
+            return source.get("mimeType").getAsString();
+        }
+        return defaultMimeType;
+    }
+
+    private void addBase64Image(String base64, String mimeType, List<String> collected) {
+        if (base64 == null || base64.isEmpty()) {
+            return;
+        }
+        String resolvedMime = (mimeType == null || mimeType.isEmpty()) ? "image/png" : mimeType;
+        collected.add("data:" + resolvedMime + ";base64," + base64);
     }
 
     private String inferLanguageCode(String voiceName) {

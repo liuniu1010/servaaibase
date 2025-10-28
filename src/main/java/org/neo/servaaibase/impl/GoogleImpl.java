@@ -149,7 +149,7 @@ public class GoogleImpl extends AbsGoogleImpl {
     }
 
     private String buildGenerateImageUrl(String model) {
-        return "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateImage";
+        return "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":predict";
     }
 
     @Override
